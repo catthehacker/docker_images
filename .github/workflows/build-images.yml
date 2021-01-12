@@ -1,0 +1,61 @@
+name: Daily build
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  push:
+  pull_request:
+
+jobs:
+  act-base:
+    name: Build docker images for act
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        DISTRIB_ID: [ubuntu]
+        DISTRIB_RELEASE: [16.04, 18.04, 20.04, latest]
+        PLATFORMS: [linux/amd64, linux/arm64, linux/386]
+        IMAGE_TYPE: [nodejs]
+        exclude:
+          - DISTRIB_RELEASE: 20.04 # focal i386 doesn't exists (yet?)
+            PLATFORMS: linux/386
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Log into ghcr
+        if: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u catthehacker --password-stdin
+      - name: Check which version is currently `ubuntu-latest`
+        id: ubuntu_latest
+        if: ${{ matrix.DISTRIB_RELEASE == 'latest' }}
+        run: echo "::set-output name=UBUNTU_LATEST::$(lsb_release -sr)"
+      - name: Build and push ${{ matrix.DISTRIB_ID }}-${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }} image
+        id: docker_build_version
+        uses: docker/build-push-action@v2
+        if: ${{ matrix.DISTRIB_RELEASE != 'latest' }}
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          file: ./linux/${{ matrix.DISTRIB_ID }}/${{ matrix.IMAGE_TYPE }}/Dockerfile
+          platforms: ${{ matrix.PLATFORMS }}
+          tags: ghcr.io/catthehacker/docker-images:${{ matrix.DISTRIB_ID }}-${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
+          build-args: |
+            DISTRIB_ID=${{ matrix.DISTRIB_ID }}
+            DISTRIB_RELEASE=${{ matrix.DISTRIB_RELEASE }}
+      - name: Build and push ${{ matrix.DISTRIB_ID }}-${{ matrix.IMAGE_TYPE }}-latest image
+        id: docker_build_latest
+        uses: docker/build-push-action@v2
+        if: ${{ matrix.DISTRIB_RELEASE == 'latest' }}
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          file: ./linux/${{ matrix.DISTRIB_ID }}/${{ matrix.IMAGE_TYPE }}/Dockerfile
+          platforms: ${{ matrix.PLATFORMS }}
+          tags: ghcr.io/catthehacker/docker-images:${{ matrix.DISTRIB_ID }}-${{ matrix.IMAGE_TYPE }}-latest
+          build-args: |
+            DISTRIB_ID=${{ matrix.DISTRIB_ID }}
+            DISTRIB_RELEASE=${{ steps.ubuntu_latest.outputs.UBUNTU_LATEST }}
