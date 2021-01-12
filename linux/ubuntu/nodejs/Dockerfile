@@ -21,6 +21,7 @@ RUN apt -yq update && \
     apt -yq upgrade && \
     apt -yq install nodejs && \
     apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/* && \
     groupadd -g 1000 ${RUNNER_USER} && \
     useradd -u 1000 -g ${RUNNER_USER} -G sudo -m -s /bin/bash ${RUNNER_USER} && \
