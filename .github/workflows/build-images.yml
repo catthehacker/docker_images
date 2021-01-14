@@ -9,7 +9,7 @@ on:
 
 jobs:
   act-base:
-    name: Build docker images for act
+    name: Build base docker images for act
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,7 +17,7 @@ jobs:
       matrix:
         DISTRIB_ID: [ubuntu]
         DISTRIB_RELEASE: [latest, 20.04, 18.04, 16.04]
-        IMAGE_TYPE: [nodejs]
+        IMAGE_TYPE: [nodejs, runner]
         NODE_VERSION: ['12']
     steps:
       - uses: actions/checkout@v2
