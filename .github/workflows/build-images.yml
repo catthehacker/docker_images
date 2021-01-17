@@ -36,6 +36,14 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      - name: Login to Quay
+        if: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: catthehacker+docker_images
+          password: ${{ secrets.QUAY_TOKEN }}
+
       - name: Login to Docker Hub
         if: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
         uses: docker/login-action@v1
@@ -59,6 +67,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
+            quay.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
             docker.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
           build-args: |
             DISTRIB_ID=${{ matrix.DISTRIB_ID }}
@@ -76,6 +85,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: |
             ghcr.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
+            quay.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
             docker.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
           build-args: |
             DISTRIB_ID=${{ matrix.DISTRIB_ID }}
