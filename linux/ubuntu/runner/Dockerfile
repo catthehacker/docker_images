@@ -39,7 +39,7 @@ RUN set -Eeuxo pipefail && \
     printf "Build started" && \
     apt -yq update && \
     printf "Updated apt lists and upgraded packages\n\n" && \
-    apt -yq install --no-install-recommends lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https && \
+    apt -yq install --no-install-recommends lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https zstd && \
     printf "Installed base utils"
 
 # > Install Node.JS
