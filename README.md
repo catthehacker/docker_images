@@ -4,7 +4,7 @@
 
 ## When updates will be applied to images
 
-- A package that will be required for action(s) to work properly might be added
+- A package that will be required for action(s) to work properly might be added/removed/changed
 - Any maintainance that will be required due to:
   - Docker Hub
   - Quay
@@ -15,8 +15,8 @@
 
 ## Images available
 
-- github.com/catthehacker/virtual-environments - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
-  - `quay.io/catthehacker/virtual-environments:ubuntu-20.04` - this image is updated manually due to amount of changes in github.com/actions/virtual-environments
+- [virtual-environments](github.com/catthehacker/virtual-environments) - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
+  - `quay.io/catthehacker/virtual-environments:ubuntu-20.04` - this image is updated manually due to amount of changes in [github.com/actions/virtual-environments](github.com/actions/virtual-environments)
   - more to come...
 - `\linux\ubuntu\runner\Dockerfile` - used as base image for [github.com/catthehacker/act](https://github.com/catthehacker/act)
   - ghcr.io (GitHub Container Registry)
