@@ -1,10 +1,16 @@
-name: Daily build
+name: Build Docker image
 
 on:
   schedule:
     - cron: 0 0 * * *
   push:
+    paths:
+      - '.github/workflows/build-images.yml'
+      - 'linux/**'
   pull_request:
+    paths:
+      - '.github/workflows/build-images.yml'
+      - 'linux/**'
   workflow_dispatch:
 
 jobs:
