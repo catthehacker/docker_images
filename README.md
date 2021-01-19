@@ -1,6 +1,6 @@
 # Docker images
 
-[![Daily build](https://github.com/CatTheHacker/docker-images/workflows/Daily%20build/badge.svg)](https://github.com/CatTheHacker/docker-images/actions?query=workflow%3A%22Daily+build%22)
+[![Build Docker image](https://github.com/CatTheHacker/docker-images/workflows/Build%20Docker%20image/badge.svg)](https://github.com/CatTheHacker/docker-images/actions?query=workflow%3A%22Build+Docker+image%22)
 
 ## When updates will be applied to images
 
