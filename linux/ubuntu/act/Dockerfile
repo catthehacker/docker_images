@@ -38,7 +38,12 @@ RUN set -Eeuxo pipefail && \
     apt -yq update && \
     printf "Updated apt lists and upgraded packages\n\n" && \
     apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd && \
-    printf "Installed base utils"
+    printf "Installed base utils" && \
+    printf "Cleaning image" && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/* && \
+    printf "Cleaned up image"
 
 # > Install Node.JS
 RUN set -Eeuxo pipefail && \
@@ -49,10 +54,7 @@ RUN set -Eeuxo pipefail && \
     echo "deb-src https://deb.nodesource.com/node_${NODE_VERSION}.x $DISTRO main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
     apt -yq update && \
     apt -yq install --no-install-recommends nodejs="${NODE_VERSION}*" && \
-    printf "Installed Node.JS $(node -v)"
-
-# > Clean up image
-RUN set -Eeuxo pipefail && \
+    printf "Installed Node.JS $(node -v)" && \
     printf "Cleaning image" && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
