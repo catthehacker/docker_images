@@ -2,7 +2,7 @@ name: Build Docker image
 
 on:
   schedule:
-    - cron: 0 0 * * *
+    - cron: 0 12 * * *
   push:
     paths:
       - '.github/workflows/build-images.yml'
