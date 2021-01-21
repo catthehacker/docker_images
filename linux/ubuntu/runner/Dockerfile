@@ -39,8 +39,9 @@ RUN set -Eeuxo pipefail && \
     printf "Build started" && \
     apt -yq update && \
     printf "Updated apt lists and upgraded packages\n\n" && \
-    apt -yq install --no-install-recommends lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https zstd && \
+    apt -yq install --no-install-recommends lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https zstd unzip && \
     printf "Installed base utils" && \
+    dpkg-query -f '${binary:Package}\n' -W && \
     printf "Cleaning image" && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \

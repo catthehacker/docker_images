@@ -37,8 +37,9 @@ RUN set -Eeuxo pipefail && \
 RUN set -Eeuxo pipefail && \
     apt -yq update && \
     printf "Updated apt lists and upgraded packages\n\n" && \
-    apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd && \
+    apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip && \
     printf "Installed base utils" && \
+    dpkg-query -f '${binary:Package}\n' -W && \
     printf "Cleaning image" && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
