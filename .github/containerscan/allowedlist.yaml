@@ -1,0 +1,4 @@
+general:
+  vulnerabilities:
+  bestPracticeViolations:
+    - DKL-DI-0001 # * FATAL:Avoid sudo command
