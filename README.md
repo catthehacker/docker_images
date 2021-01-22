@@ -24,9 +24,29 @@
     - `ghcr.io/catthehacker/ubuntu:runner-18.04`
     - `ghcr.io/catthehacker/ubuntu:runner-20.04`
     - `ghcr.io/catthehacker/ubuntu:runner-latest`
+  - quay.io (RedHat Container Registry)
+    - `quay.io/catthehacker/ubuntu:runner-16.04`
+    - `quay.io/catthehacker/ubuntu:runner-18.04`
+    - `quay.io/catthehacker/ubuntu:runner-20.04`
+    - `quay.io/catthehacker/ubuntu:runner-latest`
+  - docker.io (DockerHub)
+    - `catthehacker/ubuntu:runner-16.04`
+    - `catthehacker/ubuntu:runner-18.04`
+    - `catthehacker/ubuntu:runner-20.04`
+    - `catthehacker/ubuntu:runner-latest`
 - `\linux\ubuntu\act\Dockerfile` - proposal for [github.com/nektos/act](https://github.com/nektos/act) as base image before support for above image is implemented
   - ghcr.io (GitHub Container Registry)
     - `ghcr.io/catthehacker/ubuntu:act-16.04`
     - `ghcr.io/catthehacker/ubuntu:act-18.04`
     - `ghcr.io/catthehacker/ubuntu:act-20.04`
     - `ghcr.io/catthehacker/ubuntu:act-latest`
+  - quay.io (RedHat Container Registry)
+    - `quay.io/catthehacker/ubuntu:act-16.04`
+    - `quay.io/catthehacker/ubuntu:act-18.04`
+    - `quay.io/catthehacker/ubuntu:act-20.04`
+    - `quay.io/catthehacker/ubuntu:act-latest`
+  - docker.io (DockerHub)
+    - `catthehacker/ubuntu:act-16.04`
+    - `catthehacker/ubuntu:act-18.04`
+    - `catthehacker/ubuntu:act-20.04`
+    - `catthehacker/ubuntu:act-latest`
