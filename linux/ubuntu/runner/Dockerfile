@@ -19,7 +19,7 @@ SHELL [ "/bin/bash", "-c" ]
 
 # > setup environment required for GitHub Actions
 RUN set -Eeuxo pipefail && \
-    printf "Build started" && \
+    printf "Build started\n" && \
     ImageOS=${DISTRIB_ID}$(echo ${DISTRIB_RELEASE} | cut -d'.' -f 1) && \
     echo "IMAGE_OS=$ImageOS" | tee -a /etc/environment && \
     echo "ImageOS=$ImageOS" | tee -a /etc/environment && \
@@ -43,7 +43,11 @@ RUN set -Eeuxo pipefail && \
     apt -yq update && \
     printf "Updated apt lists and upgraded packages\n\n" && \
     apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip && \
-    printf "Installed base utils\n" && \
+    printf "Installed base utils\nInstalling docker\n" && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
+    add-apt-repository "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+    apt -yq update && \
+    apt -yq install docker-ce-cli && \
     printf "Cleaning image\n" && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
