@@ -34,7 +34,7 @@
     - `catthehacker/ubuntu:runner-18.04`
     - `catthehacker/ubuntu:runner-20.04`
     - `catthehacker/ubuntu:runner-latest`
-- `\linux\ubuntu\act\Dockerfile` - proposal for [github.com/nektos/act](https://github.com/nektos/act) as base image before support for above image is implemented
+- `\linux\ubuntu\act\Dockerfile` - image used in [github.com/nektos/act](https://github.com/nektos/act) as medium size image retaining compatibility with most actions while maintaining small size
   - ghcr.io (GitHub Container Registry)
     - `ghcr.io/catthehacker/ubuntu:act-16.04`
     - `ghcr.io/catthehacker/ubuntu:act-18.04`
