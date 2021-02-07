@@ -97,3 +97,18 @@ jobs:
             DISTRIB_ID=${{ matrix.DISTRIB_ID }}
             DISTRIB_RELEASE=${{ steps.ubuntu_latest.outputs.UBUNTU_LATEST }}
             NODE_VERSION=${{ matrix.NODE_VERSION }}
+  scan:
+    runs-on: ubuntu-latest
+    needs:
+      - act-base
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+      matrix:
+        DISTRIB_ID: [ubuntu]
+        DISTRIB_RELEASE: [latest, 20.04, 18.04, 16.04]
+        IMAGE_TYPE: [act, runner]
+    steps:
+      - uses: azure/container-scan@v0
+        with:
+          image-name: ghcr.io/catthehacker/${{ matrix.DISTRIB_ID }}:${{ matrix.IMAGE_TYPE }}-${{ matrix.DISTRIB_RELEASE }}
