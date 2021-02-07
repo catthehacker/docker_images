@@ -80,7 +80,7 @@ RUN set -Eeuxo pipefail && \
     printf "Created non-root user $(grep ${RUNNER_USER} /etc/passwd)\n"
 
 # > Home repository
-LABEL org.opencontainers.image.source="https://github.com/CatTheHacker/docker-images"
+LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
 
 # > Don't run as root, generally not good idea
 USER ${RUNNER_USER}:${RUNNER_USER}

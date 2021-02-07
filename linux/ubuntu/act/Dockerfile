@@ -63,7 +63,7 @@ RUN set -Eeuxo pipefail && \
     printf "Cleaned up image\n"
 
 # > Home repository
-LABEL org.opencontainers.image.source="https://github.com/CatTheHacker/docker-images"
+LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
 
 SHELL [ "/bin/bash", "--login" ]
 
