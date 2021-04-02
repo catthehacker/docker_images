@@ -93,7 +93,7 @@ USER ${RUNNER_USER}:${RUNNER_USER}
 
 WORKDIR /home/runner
 
-SHELL [ "/bin/bash", "--login" ]
+SHELL [ "/bin/bash", "--login", "-c" ]
 
 # > Force bash with environment
-ENTRYPOINT [ "/bin/bash", "--login" ]
+ENTRYPOINT [ "/bin/bash", "--login", "-c" ]
