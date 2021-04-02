@@ -37,7 +37,7 @@ RUN set -Eeuxo pipefail \
 RUN set -Eeuxo pipefail \
     && apt -yq update \
     && printf "Updated apt lists and upgraded packages\n\n" \
-    && apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip $(apt-cache search libicu | grep -E 'libicu[[:digit:]]+ -' | cut -d " " -f 1) \
+    && apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip xz-utils $(apt-cache search libicu | grep -E 'libicu[[:digit:]]+ -' | cut -d " " -f 1) \
     && printf "Installed base utils\nInstalling docker\n" \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - \
     && add-apt-repository "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
