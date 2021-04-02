@@ -71,7 +71,7 @@ RUN set -Eeuxo pipefail \
 # > Home repository
 LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
 
-SHELL [ "/bin/bash", "--login" ]
+SHELL [ "/bin/bash", "--login", "-c" ]
 
 # > Force bash with environment
-ENTRYPOINT [ "/bin/bash", "--login" ]
+ENTRYPOINT [ "/bin/bash", "--login", "-c" ]
