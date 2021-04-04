@@ -70,8 +70,17 @@ RUN set -Eeuxo pipefail \
     && rm -rf /tmp/* \
     && printf "Cleaned up image\n"
 
-# > Home repository
-LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
+ARG BUILD_TAG_VERSION="master"
+ARG BUILD_TAG="act"
+ARG BUILD_REF="master"
+
+LABEL org.opencontainers.image.vendor="catthehacker"
+LABEL org.opencontainers.image.authors="me@hackerc.at"
+LABEL org.opencontainers.image.url="https://github.com/catthehacker/docker_images"
+LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images.git"
+LABEL org.opencontainers.image.version=${BUILD_TAG_VERSION}
+LABEL org.opencontainers.image.title=${BUILD_TAG}
+LABEL org.opencontainers.image.revision=${BUILD_REF}
 
 USER root
 
