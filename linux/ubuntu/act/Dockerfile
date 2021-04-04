@@ -17,6 +17,8 @@ SHELL [ "/bin/bash", "-c" ]
 # > setup environment required for GitHub Actions
 RUN set -Eeuxo pipefail \
     && printf "Build started\n" \
+    && echo "USER=$(whoami)" | tee -a /etc/environment \
+    && echo "RUNNER_USER=$(whoami)" | tee -a /etc/environment \
     && ImageOS=${DISTRIB_ID}$(echo ${DISTRIB_RELEASE} | cut -d'.' -f 1) \
     && echo "IMAGE_OS=$ImageOS" | tee -a /etc/environment \
     && echo "ImageOS=$ImageOS" | tee -a /etc/environment \
@@ -70,6 +72,8 @@ RUN set -Eeuxo pipefail \
 
 # > Home repository
 LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
+
+USER root
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
