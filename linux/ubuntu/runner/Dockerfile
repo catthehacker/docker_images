@@ -74,16 +74,26 @@ RUN set -Eeuxo pipefail \
     && printf "Cleaned up image\n"
 
 # > Create non-root user
-RUN set -Eeuxo pipefail && \
-    printf "Creating non-root user\n" && \
-    groupadd -g 1000 ${RUNNER_USER} && \
-    useradd -u 1000 -g ${RUNNER_USER} -G sudo -m -s /bin/bash ${RUNNER_USER} && \
-    sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
-    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
-    echo "${RUNNER_USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-    printf "runner user: $(su - ${RUNNER_USER} -c id)\n" && \
-    printf "Created non-root user $(grep ${RUNNER_USER} /etc/passwd)\n"
+RUN set -Eeuxo pipefail \
+    && printf "Creating non-root user\n" \
+    && groupadd -g 1000 ${RUNNER_USER} \
+    && useradd -u 1000 -g ${RUNNER_USER} -G sudo -m -s /bin/bash ${RUNNER_USER} \
+    && sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' \
+    && sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' \
+    && sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' \
+    && echo "${RUNNER_USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && printf "Runner user: $(su - ${RUNNER_USER} -c id)\n" \
+    && printf "Created non-root user $(grep ${RUNNER_USER} /etc/passwd)\n" \
+    && echo "USER=${RUNNER_USER}" | tee -a /etc/environment \
+    && echo "RUNNER_USER=${RUNNER_USER}" | tee -a /etc/environment \
+    && echo "RUNNER_TEMP=/home/${RUNNER_USER}/work/_temp" | tee -a /etc/environment \
+    && mkdir -p "/home/${RUNNER_USER}/work/_temp" \
+    && chown -R ${RUNNER_USER}:${RUNNER_USER} "/home/${RUNNER_USER}/work" \
+    && mkdir -p "/home/${RUNNER_USER}/.ssh" \
+    && chmod 700 "/home/${RUNNER_USER}/.ssh" \
+    && ssh-keyscan github.com | tee "/home/${RUNNER_USER}/.ssh/known_hosts" \
+    && chmod 644 "/home/${RUNNER_USER}/.ssh/known_hosts" \
+    && chown -R ${RUNNER_USER}:${RUNNER_USER} "/home/${RUNNER_USER}/.ssh"
 
 ARG BUILD_TAG_VERSION="master"
 ARG BUILD_TAG="runner"
