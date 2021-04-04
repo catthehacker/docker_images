@@ -44,7 +44,7 @@ RUN set -Eeuxo pipefail \
     && printf "Updated apt lists and upgraded packages\n\n" \
     && apt -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip xz-utils $(apt-cache search libicu | grep -E 'libicu[[:digit:]]+ -' | cut -d " " -f 1) \
     && printf "Installed base utils\nInstalling docker\n" \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     && add-apt-repository "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
     && apt -yq update \
     && apt -yq install docker-ce-cli \
