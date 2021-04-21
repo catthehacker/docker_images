@@ -1,0 +1,130 @@
+name: Build ubuntu images
+
+on:
+  schedule:
+    - cron: 0 12 */7 * *
+  push:
+    paths:
+      - '.github/workflows/build-ubuntu.yml'
+      - 'linux/ubuntu/**'
+  pull_request:
+    paths:
+      - '.github/workflows/build-ubuntu.yml'
+      - 'linux/ubuntu/**'
+  workflow_dispatch:
+
+env:
+  NODE: '12'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == github.repository_owner && github.event_name != 'pull_request' }}
+    strategy:
+      fail-fast: true
+      max-parallel: 4
+      matrix:
+        BASEIMAGE: [ubuntu]
+        TAG: [latest, 20.04, 18.04, 16.04]
+        IMAGE_TYPE: [act]
+    steps:
+      - name: Login to GitHub Container Registry
+        id: ghcr
+        if: ${{ github.actor == github.repository_owner }}
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Quay
+        id: quay
+        if: ${{ github.actor == github.repository_owner }}
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USER }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Login to Docker Hub
+        id: dckr
+        if: ${{ github.actor == github.repository_owner }}
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Print date in UTC format
+        id: print-date
+        run: echo "::set-output name=date::$(date +%Y%m%d)"
+
+      - name: Set Ubuntu version to RELEASE
+        id: release
+        run: |
+          if [ "latest" = "${{ matrix.TAG }}" ]; then
+            echo "::set-output name=RELEASE::$(lsb_release -rs)"
+          else
+            echo "::set-output name=RELEASE::${{ matrix.TAG }}"
+          fi
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: actions/checkout@v2
+
+      - name: Build and push ${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:act-${{ matrix.TAG }}-${{ steps.print-date.outputs.date }}
+        id: act
+        uses: docker/build-push-action@v2
+        env:
+          GHCR_TAG: ghcr.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:act-${{ matrix.TAG }}
+          QUAY_TAG: quay.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:act-${{ matrix.TAG }}
+          DCKR_TAG: docker.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:act-${{ matrix.TAG }}
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          file: ./linux/${{ matrix.BASEIMAGE }}/act/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.GHCR_TAG }}
+            ${{ env.GHCR_TAG }}-${{ steps.print-date.outputs.date }}
+            ${{ env.QUAY_TAG }}
+            ${{ env.QUAY_TAG }}-${{ steps.print-date.outputs.date }}
+            ${{ env.DCKR_TAG }}
+            ${{ env.DCKR_TAG }}-${{ steps.print-date.outputs.date }}
+          build-args: |
+            BASEIMAGE=buildpack-deps
+            TAG=${{ steps.release.outputs.RELEASE }}
+            NODE_VERSION=${{ env.NODE }}
+            BUILD_TAG_VERSION=${{ steps.print-date.outputs.date }}
+            BUILD_TAG=act
+            BUILD_REF=${{ github.sha }}
+
+      - name: Build and push ${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}-${{ steps.print-date.outputs.date }}
+        id: runner
+        uses: docker/build-push-action@v2
+        env:
+          GHCR_TAG: ghcr.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
+          QUAY_TAG: quay.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
+          DCKR_TAG: docker.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          file: ./linux/${{ matrix.BASEIMAGE }}/runner/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.GHCR_TAG }}
+            ${{ env.GHCR_TAG }}-${{ steps.print-date.outputs.date }}
+            ${{ env.QUAY_TAG }}
+            ${{ env.QUAY_TAG }}-${{ steps.print-date.outputs.date }}
+            ${{ env.DCKR_TAG }}
+            ${{ env.DCKR_TAG }}-${{ steps.print-date.outputs.date }}
+          build-args: |
+            BASEIMAGE=catthehacker/ubuntu
+            TAG=act-${{ matrix.TAG }}
+            BUILD_TAG_VERSION=${{ steps.print-date.outputs.date }}
+            BUILD_TAG=${{ matrix.IMAGE_TYPE }}
+            BUILD_REF=${{ github.sha }}
