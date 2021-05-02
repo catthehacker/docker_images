@@ -37,7 +37,7 @@ RUN set -Eeuxo pipefail \
     && printf "Installing packages\n\n" \
     && apt-get -yq update \
     && printf "Updated apt lists and upgraded packages\n\n" \
-    && apt-get -yq install --no-install-recommends ssh lsb-release gawk jq curl git wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip xz-utils "$(apt-cache search libicu | grep -E 'libicu[[:digit:]]+ -' | cut -d \" \" -f 1)" \
+    && apt-get -yq install --no-install-recommends ssh lsb-release gawk jq curl git git-lfs wget sudo gnupg-agent ca-certificates software-properties-common apt-transport-https libyaml-0-2 zstd unzip xz-utils "$(apt-cache search libicu | grep -E 'libicu[[:digit:]]+ -' | cut -d \" \" -f 1)" \
     && printf "Creating ~/.ssh and adding 'github.com'\n\n" \
     && mkdir -p ~/.ssh \
     && chmod 700 ~/.ssh \
