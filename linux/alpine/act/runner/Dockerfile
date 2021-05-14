@@ -5,7 +5,7 @@ FROM ${BASEIMAGE}:${TAG}
 SHELL [ "/bin/ash", "-o", "pipefail", "-l", "-c" ]
 
 # > Create non-root user
-RUN set -Eeuxo pipefail \
+RUN set -euxo pipefail \
     && printf "Creating non-root user\n" \
     && addgroup -S ${RUNNER_USER} -g 1000 && adduser -S ${RUNNER_USER} -u 1000 -G ${RUNNER_USER} -s /usr/bin/fish \
     && sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' \
