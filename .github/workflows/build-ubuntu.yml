@@ -20,7 +20,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: ${{ ( github.actor == github.repository_owner && github.event_name != 'pull_request' ) || ( github.actor != github.repository_owner ) || env.ACT }}
+    if: ${{ ( github.actor == github.repository_owner && github.event_name != 'pull_request' ) || ( github.actor != github.repository_owner ) }}
     strategy:
       fail-fast: true
       max-parallel: 4
