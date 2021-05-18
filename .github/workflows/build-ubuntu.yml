@@ -20,7 +20,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: ${{ github.actor == github.repository_owner && github.event_name != 'pull_request' }}
+    if: ${{ ( github.actor == github.repository_owner && github.event_name != 'pull_request' ) || ( github.actor != github.repository_owner ) || env.ACT }}
     strategy:
       fail-fast: true
       max-parallel: 4
@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Login to GitHub Container Registry
         id: ghcr
-        if: ${{ github.actor == github.repository_owner }}
+        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -40,7 +40,7 @@ jobs:
 
       - name: Login to Quay
         id: quay
-        if: ${{ github.actor == github.repository_owner }}
+        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           registry: quay.io
@@ -49,7 +49,7 @@ jobs:
 
       - name: Login to Docker Hub
         id: dckr
-        if: ${{ github.actor == github.repository_owner }}
+        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
@@ -85,7 +85,7 @@ jobs:
           DCKR_TAG: docker.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:act-${{ matrix.TAG }}
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
           file: ./linux/${{ matrix.BASEIMAGE }}/act/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: |
@@ -106,13 +106,14 @@ jobs:
       - name: Build and push ${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}-${{ steps.print-date.outputs.date }}
         id: runner
         uses: docker/build-push-action@v2
+        if: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
         env:
           GHCR_TAG: ghcr.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
           QUAY_TAG: quay.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
           DCKR_TAG: docker.io/${{ github.repository_owner }}/${{ matrix.BASEIMAGE }}:runner-${{ matrix.TAG }}
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' }}
+          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
           file: ./linux/${{ matrix.BASEIMAGE }}/runner/Dockerfile
           platforms: linux/amd64,linux/arm64
           tags: |
