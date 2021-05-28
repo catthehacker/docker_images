@@ -1,27 +1,32 @@
 name: Build alpine images
 
 on:
-  schedule:
-    - cron: 0 12 */7 * *
-  push:
-    paths:
-      - '.github/workflows/build-alpine.yml'
-      - 'linux/alpine/act/**'
-  pull_request:
-    paths:
-      - '.github/workflows/build-alpine.yml'
-      - 'linux/alpine/act/**'
+  #schedule:
+  #  - cron: 0 12 */7 * *
+  #push:
+  #  paths:
+  #    - '.github/workflows/build-alpine.yml'
+  #    - 'linux/alpine/**'
+  #  branches:
+  #    - 'master'
+  #pull_request:
+  #  paths:
+  #    - '.github/workflows/build-alpine.yml'
+  #    - 'linux/alpine/**'
   workflow_dispatch:
+
+env:
+  SLUG: ${{ github.repository_owner }}/alpine
+  IMAGE: alpine
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-    if: ${{ ( github.actor == github.repository_owner && github.event_name != 'pull_request' ) || ( github.actor != github.repository_owner ) }}
+    environment: Images
     steps:
       - name: Login to GitHub Container Registry
         id: ghcr
-        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -30,7 +35,6 @@ jobs:
 
       - name: Login to Quay
         id: quay
-        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           registry: quay.io
@@ -39,15 +43,21 @@ jobs:
 
       - name: Login to Docker Hub
         id: dckr
-        if: ${{ github.actor == github.repository_owner && !env.ACT }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Print date in UTC format
-        id: print-date
-        run: echo "::set-output name=date::$(date +%Y%m%d)"
+      - name: Print tag
+        id: print-tag
+        run: |
+          if [ ${{ github.event_name }} == 'pull_request'}} && ${{ !env.ACT }} ]; then
+            echo "::set-output name=tag::PR-${{ github.event.number }}"
+          elif [ "${ACT}" == "true" ]; then
+            echo "::set-output name=tag::dev"
+          else
+            echo "::set-output name=tag::$(date +%Y%m%d)"
+          fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -57,56 +67,100 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build and push ${{ github.repository_owner }}/alpine:act-${{ steps.print-date.outputs.date }}
-        id: act
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         uses: docker/build-push-action@v2
         env:
-          GHCR_TAG: ghcr.io/${{ github.repository_owner }}/alpine:act
-          QUAY_TAG: quay.io/${{ github.repository_owner }}/alpine:act
-          DCKR_TAG: docker.io/${{ github.repository_owner }}/alpine:act
+          TAG: act-${{ steps.print-tag.outputs.tag }}
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
-          file: ./linux/alpine/act/base/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          file: ./linux/${{ env.IMAGE }}/act/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
           tags: |
-            ${{ env.GHCR_TAG }}
-            ${{ env.GHCR_TAG }}-${{ steps.print-date.outputs.date }}
-            ${{ env.QUAY_TAG }}
-            ${{ env.QUAY_TAG }}-${{ steps.print-date.outputs.date }}
-            ${{ env.DCKR_TAG }}
-            ${{ env.DCKR_TAG }}-${{ steps.print-date.outputs.date }}
+            ghcr.io/${{ env.SLUG }}:${{ env.TAG }}
+            quay.io/${{ env.SLUG }}:${{ env.TAG }}
+            docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
-            BASEIMAGE=node
-            TAG=lts-alpine3.13
-            DISTRIB_RELEASE=${{ steps.release.outputs.RELEASE }}
-            BUILD_TAG_VERSION=${{ steps.print-date.outputs.date }}
+            IMAGEOS=${{ env.IMAGE }}
+            BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=act
             BUILD_REF=${{ github.sha }}
 
-      - name: Build and push ${{ github.repository_owner }}/alpine:runner-${{ steps.print-date.outputs.date }}
-        id: runner
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         uses: docker/build-push-action@v2
-        if: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
         env:
-          GHCR_TAG: ghcr.io/${{ github.repository_owner }}/alpine:runner
-          QUAY_TAG: quay.io/${{ github.repository_owner }}/alpine:runner
-          DCKR_TAG: docker.io/${{ github.repository_owner }}/alpine:runner
+          TAG: runner-${{ steps.print-tag.outputs.tag }}
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT }}
-          file: ./linux/alpine/act/runner/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          file: ./linux/${{ env.IMAGE }}/runner/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
           tags: |
-            ${{ env.GHCR_TAG }}
-            ${{ env.GHCR_TAG }}-${{ steps.print-date.outputs.date }}
-            ${{ env.QUAY_TAG }}
-            ${{ env.QUAY_TAG }}-${{ steps.print-date.outputs.date }}
-            ${{ env.DCKR_TAG }}
-            ${{ env.DCKR_TAG }}-${{ steps.print-date.outputs.date }}
+            ghcr.io/${{ env.SLUG }}:${{ env.TAG }}
+            quay.io/${{ env.SLUG }}:${{ env.TAG }}
+            docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
-            BASEIMAGE=catthehacker/alpine
-            TAG=act-${{ steps.print-date.outputs.date }}
-            BUILD_TAG_VERSION=${{ steps.print-date.outputs.date }}
+            IMAGE=ghcr.io/${{ env.SLUG }}
+            IMAGEOS=${{ env.IMAGE }}
+            TAG=act-${{ steps.print-tag.outputs.tag }}
+            BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=runner
+            BUILD_REF=${{ github.sha }}
+
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+
+      - uses: actions/checkout@v2
+        with:
+          ref: cat/fix/change-image
+          repository: catthehacker/act-fork
+          path: act
+
+      - env:
+          ACT_TEST_IMAGE: ghcr.io/${{ env.SLUG }}:act-${{ steps.print-tag.outputs.tag }}
+          ACT_REPOSITORY: catthehacker/act-fork
+          ACT_OWNER: catthehacker
+        run: |
+          cd act/
+          go test ./...
+
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
+        uses: docker/build-push-action@v2
+        env:
+          TAG: act
+        with:
+          context: .
+          push: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
+          file: ./linux/${{ env.IMAGE }}/act/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+          tags: |
+            ghcr.io/${{ env.SLUG }}:${{ env.TAG }}
+            quay.io/${{ env.SLUG }}:${{ env.TAG }}
+            docker.io/${{ env.SLUG }}:${{ env.TAG }}
+          build-args: |
+            IMAGEOS=${{ env.IMAGE }}
+            BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
+            BUILD_TAG=${{ env.TAG }}
+            BUILD_REF=${{ github.sha }}
+
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
+        uses: docker/build-push-action@v2
+        env:
+          TAG: runner
+        with:
+          context: .
+          push: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
+          file: ./linux/${{ env.IMAGE }}/runner/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+          tags: |
+            ghcr.io/${{ env.SLUG }}:${{ env.TAG }}
+            quay.io/${{ env.SLUG }}:${{ env.TAG }}
+            docker.io/${{ env.SLUG }}:${{ env.TAG }}
+          build-args: |
+            IMAGE=ghcr.io/${{ env.SLUG }}
+            IMAGEOS=${{ env.IMAGE }}
+            TAG=act-${{ steps.print-tag.outputs.tag }}
+            BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
+            BUILD_TAG=${{ env.TAG }}
             BUILD_REF=${{ github.sha }}
