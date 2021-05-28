@@ -1,9 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hadolint/hadolint/master/contrib/hadolint.json
+---
 ignored:
   - SC2086
-  - SC2059
   - DL3004
   - DL3002
   - DL3008
+  - DL3016
   - DL3018
   - DL3003
 trustedRegistries:

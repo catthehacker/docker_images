@@ -6,7 +6,7 @@
 ## When updates will be applied to images
 
 - A package that will be required for action(s) to work properly might be added/removed/changed
-- Any maintainance that will be required due to:
+- Any maintenance that will be required due to:
   - Docker Hub
   - Quay
   - GitHub Container Registry
@@ -34,6 +34,7 @@
 - [`/linux/alpine/act/`](./linux/alpine/act/) - Alpine base image for `act`
   - docker.io (DockerHub)
     - `catthehacker/alpine:act`
+    - `catthehacker/alpine:runner`
 
 [actions/virtual-environments]: https://github.com/actions/virtual-environments
-[catthehacker/runner-image]: https://github.com/catthehacker/runner-image
+[catthehacker/runner-image]: https://github.com/catthehacker/virtual-environments
