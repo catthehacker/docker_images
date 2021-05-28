@@ -34,6 +34,7 @@
 - [`/linux/alpine/act/`](./linux/alpine/act/) - Alpine base image for `act`
   - docker.io (DockerHub)
     - `catthehacker/alpine:act`
+    - `catthehacker/alpine:runner`
 
 [actions/virtual-environments]: https://github.com/actions/virtual-environments
 [catthehacker/runner-image]: https://github.com/catthehacker/virtual-environments
