@@ -124,7 +124,7 @@ jobs:
             BUILD_TAG=runner
             BUILD_REF=${{ github.sha }}
 
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2.1.3
         with:
           go-version: 1.16
 
