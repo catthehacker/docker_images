@@ -1,1 +1,8 @@
 build.ps1
+
+# custom stuff
+.secrets
+.env
+
+# mega-linter
+report
