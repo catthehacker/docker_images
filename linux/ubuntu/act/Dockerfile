@@ -21,6 +21,7 @@ SHELL [ "/bin/bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c" ]
 # > setup environment required for GitHub Actions
 RUN set -Eeuxo pipefail \
     && printf "\n\n\t🐋\t Build started \t🐋\t\n\n" \
+    && sed 's|"||g' -i /etc/environment \
     && echo "USER=$(whoami)" | tee -a /etc/environment \
     && echo "RUNNER_USER=$(whoami)" | tee -a /etc/environment \
     && ImageOS=ubuntu$(echo ${TAG} | cut -d'.' -f 1) \
