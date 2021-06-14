@@ -36,5 +36,7 @@
     - `catthehacker/alpine:act`
     - `catthehacker/alpine:runner`
 
+## Repository contains parts of [`actions/virtual-environments`][actions/virtual-environments] which is licenced under ["MIT License"](https://github.com/actions/virtual-environments/blob/main/LICENSE)
+
 [actions/virtual-environments]: https://github.com/actions/virtual-environments
 [catthehacker/runner-image]: https://github.com/catthehacker/virtual-environments
