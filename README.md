@@ -1,7 +1,10 @@
 # Docker images
 
-[![Build Docker image](https://github.com/CatTheHacker/docker-images/workflows/Build%20Docker%20image/badge.svg)](https://github.com/CatTheHacker/docker-images/actions?query=workflow%3A%22Build+Docker+image%22)
-[![GitHub Super-Linter](https://github.com/catthehacker/docker_images/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+[![Scheduled build (Ubuntu)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml/badge.svg?event=schedule)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml)
+[![On-demand build (Ubuntu)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml/badge.svg?event=workflow_dispatch)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml)
+[![Scheduled build (Alpine)](https://github.com/catthehacker/docker_images/actions/workflows/build-alpine.yml/badge.svg?event=schedule)](https://github.com/catthehacker/docker_images/actions/workflows/build-alpine.yml)
+[![On-demand build (Alpine)](https://github.com/catthehacker/docker_images/actions/workflows/build-alpine.yml/badge.svg?event=workflow_dispatch)](https://github.com/catthehacker/docker_images/actions/workflows/build-alpine.yml)
+[![Linter](https://github.com/catthehacker/docker_images/actions/workflows/lint.yml/badge.svg)](https://github.com/catthehacker/docker_images/actions/workflows/lint.yml)
 
 ## When updates will be applied to images
 
@@ -35,6 +38,8 @@
   - docker.io (DockerHub)
     - `catthehacker/alpine:act`
     - `catthehacker/alpine:runner`
+
+## Repository contains parts of [`actions/virtual-environments`][actions/virtual-environments] which is licenced under ["MIT License"](https://github.com/actions/virtual-environments/blob/main/LICENSE)
 
 [actions/virtual-environments]: https://github.com/actions/virtual-environments
 [catthehacker/runner-image]: https://github.com/catthehacker/virtual-environments

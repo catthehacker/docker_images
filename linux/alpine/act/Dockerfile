@@ -17,6 +17,7 @@ SHELL [ "/bin/ash", "-l", "-o", "pipefail", "-c" ]
 RUN set -euxo pipefail \
     && printf "\n\n\t🐋\t Build started \t🐋\t\n\n" \
     && printf "\n\n\t🐋\t Adding environment variables \t🐋\t\n\n" \
+    && sed 's|"||g' -i /etc/environment \
     && echo "USER=$(whoami)" | tee -a /etc/environment \
     && echo "RUNNER_USER=$(whoami)" | tee -a /etc/environment \
     && echo "IMAGE_OS=${IMAGE}" | tee -a /etc/environment \

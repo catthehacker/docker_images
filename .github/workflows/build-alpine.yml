@@ -21,7 +21,7 @@ env:
   PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
 
 jobs:
-  build:
+  build-alpine:
     runs-on: ubuntu-latest
     environment: Images
     steps:
@@ -81,7 +81,7 @@ jobs:
             quay.io/${{ env.SLUG }}:${{ env.TAG }}
             docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
-            IMAGEOS=${{ env.IMAGE }}
+            DISTRO=${{ env.IMAGE }}
             BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=act
             BUILD_REF=${{ github.sha }}
@@ -101,13 +101,13 @@ jobs:
             docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
             IMAGE=ghcr.io/${{ env.SLUG }}
-            IMAGEOS=${{ env.IMAGE }}
+            DISTRO=${{ env.IMAGE }}
             TAG=act-${{ steps.print-tag.outputs.tag }}
             BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=runner
             BUILD_REF=${{ github.sha }}
 
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2
         with:
           go-version: 1.16
 
@@ -139,7 +139,7 @@ jobs:
             quay.io/${{ env.SLUG }}:${{ env.TAG }}
             docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
-            IMAGEOS=${{ env.IMAGE }}
+            DISTRO=${{ env.IMAGE }}
             BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=${{ env.TAG }}
             BUILD_REF=${{ github.sha }}
@@ -159,7 +159,7 @@ jobs:
             docker.io/${{ env.SLUG }}:${{ env.TAG }}
           build-args: |
             IMAGE=ghcr.io/${{ env.SLUG }}
-            IMAGEOS=${{ env.IMAGE }}
+            DISTRO=${{ env.IMAGE }}
             TAG=act-${{ steps.print-tag.outputs.tag }}
             BUILD_TAG_VERSION=${{ steps.print-tag.outputs.tag }}
             BUILD_TAG=${{ env.TAG }}
