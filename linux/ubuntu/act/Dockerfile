@@ -14,9 +14,10 @@ ARG NODE_VERSION=12
 
 # > Distro
 ARG DISTRO=ubuntu
+ARG TYPE=act
 
 # > Force apt to not be interactive/not ask
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 SHELL [ "/bin/bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c" ]
 
@@ -55,16 +56,16 @@ RUN set -Eeuxo pipefail \
     && apt-get -yq update \
     && apt-get -yq install --no-install-recommends moby-cli moby-buildx \
     && printf "\n\n\t🐋 Installed moby-cli 🐋\t\n\n" \
-    && docker version \
+    && docker -v \
     && printf "\n\n\t🐋 Installed moby-buildx 🐋\t\n\n" \
     && docker buildx version \
     && printf "\n\n\t🐋 Installing Node.JS 🐋\t\n\n" \
-    && ver=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${NODE_VERSION}\"))][0].version" -r) \
-    && node_path=$AGENT_TOOLSDIRECTORY/node/$(echo $ver | sed 's/v//g')/x64 \
-    && mkdir -v -m 0777 -p $node_path \
-    && curl "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-${ver}-linux-x64.tar.xz" | tar -Jxf - --strip-components=1 -C $node_path \
-    && sed "s|PATH=|PATH=${node_path}/bin:|g" -i /etc/environment \
-    && export PATH="${node_path}/bin:$PATH" \
+    && VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${NODE_VERSION}\"))][0].version" -r) \
+    && NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/x64" \
+    && mkdir -v -m 0777 -p $NODEPATH \
+    && curl "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-$VER-linux-x64.tar.xz" | tar -Jxf - --strip-components=1 -C $NODEPATH \
+    && sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment \
+    && export PATH="$NODEPATH/bin:$PATH" \
     && printf "\n\n\t🐋 Installed Node.JS $(node -v) 🐋\t\n\n" \
     && printf "\n\n\t🐋 Installed NPM $(npm -v) 🐋\t\n\n" \
     && printf "\n\n\t🐋 Cleaning image 🐋\t\n\n" \
@@ -78,7 +79,7 @@ ARG BUILD_REF="master"
 
 LABEL org.opencontainers.image.vendor="catthehacker"
 LABEL org.opencontainers.image.authors="me@hackerc.at"
-LABEL org.opencontainers.image.url="https://github.com/catthehacker/docker_images/tree/${BUILD_REF}/linux/${DISTRO}/${BUILD_TAG}/"
+LABEL org.opencontainers.image.url="https://github.com/catthehacker/docker_images/tree/${BUILD_REF}/linux/${DISTRO}/${TYPE}/"
 LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
 LABEL org.opencontainers.image.version=${BUILD_TAG_VERSION}
 LABEL org.opencontainers.image.title=${BUILD_TAG}-${TARGETARCH}
