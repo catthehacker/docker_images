@@ -17,7 +17,7 @@ ARG DISTRO=ubuntu
 ARG TYPE=act
 
 # > Force apt to not be interactive/not ask
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 SHELL [ "/bin/bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "-c" ]
 
