@@ -63,7 +63,7 @@ RUN set -Eeuxo pipefail \
     && node_path=$AGENT_TOOLSDIRECTORY/node/$(echo $ver | sed 's/v//g')/x64 \
     && mkdir -v -m 0777 -p $node_path \
     && curl "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-${ver}-linux-x64.tar.xz" | tar -Jxf - --strip-components=1 -C $node_path \
-    && sed "s|PATH=|PATH=${node_path}/bin:|g" -i /etc/environment \
+    && sed "s|^PATH=|PATH=${node_path}/bin:|mg" -i /etc/environment \
     && export PATH="${node_path}/bin:$PATH" \
     && printf "\n\n\t🐋 Installed Node.JS $(node -v) 🐋\t\n\n" \
     && printf "\n\n\t🐋 Installed NPM $(npm -v) 🐋\t\n\n" \
