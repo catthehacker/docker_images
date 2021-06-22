@@ -14,6 +14,7 @@ ARG NODE_VERSION=12
 
 # > Distro
 ARG DISTRO=ubuntu
+ARG TYPE=act
 
 # > Force apt to not be interactive/not ask
 ARG DEBIAN_FRONTEND=noninteractive
@@ -78,7 +79,7 @@ ARG BUILD_REF="master"
 
 LABEL org.opencontainers.image.vendor="catthehacker"
 LABEL org.opencontainers.image.authors="me@hackerc.at"
-LABEL org.opencontainers.image.url="https://github.com/catthehacker/docker_images/tree/${BUILD_REF}/linux/${DISTRO}/${BUILD_TAG}/"
+LABEL org.opencontainers.image.url="https://github.com/catthehacker/docker_images/tree/${BUILD_REF}/linux/${DISTRO}/${TYPE}/"
 LABEL org.opencontainers.image.source="https://github.com/catthehacker/docker_images"
 LABEL org.opencontainers.image.version=${BUILD_TAG_VERSION}
 LABEL org.opencontainers.image.title=${BUILD_TAG}-${TARGETARCH}
