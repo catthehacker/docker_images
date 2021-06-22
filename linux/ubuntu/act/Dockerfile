@@ -56,7 +56,7 @@ RUN set -Eeuxo pipefail \
     && apt-get -yq update \
     && apt-get -yq install --no-install-recommends moby-cli moby-buildx \
     && printf "\n\n\t🐋 Installed moby-cli 🐋\t\n\n" \
-    && docker version \
+    && docker -v \
     && printf "\n\n\t🐋 Installed moby-buildx 🐋\t\n\n" \
     && docker buildx version \
     && printf "\n\n\t🐋 Installing Node.JS 🐋\t\n\n" \
