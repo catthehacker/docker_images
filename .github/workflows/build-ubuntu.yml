@@ -214,7 +214,7 @@ jobs:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
           TYPE: ${{ matrix.TYPE }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}
+          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           DISTRO: ${{ env.IMAGE }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
@@ -225,8 +225,8 @@ jobs:
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
           TYPE: ${{ matrix.TYPE }}
-          DISTRO: ${{ env.IMAGE }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          DISTRO: ${{ env.IMAGE }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
