@@ -209,7 +209,7 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}-${{ env.PART_TAG }}
         run: ./build.sh
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
@@ -217,5 +217,16 @@ jobs:
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}
           DISTRO: ${{ env.IMAGE }}
+          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+          BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
+
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
+        run: ./build.sh
+        env:
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
+          TYPE: ${{ matrix.TYPE }}
+          DISTRO: ${{ env.IMAGE }}
+          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
