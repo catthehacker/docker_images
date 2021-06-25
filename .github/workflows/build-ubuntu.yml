@@ -141,7 +141,6 @@ jobs:
       - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
         run: ./build.sh
-        shell: sh
         env:
           TAG: runner-${{ matrix.TAG }}
           TYPE: runner
@@ -222,6 +221,7 @@ jobs:
 
       - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         run: ./build.sh
+        if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
           TYPE: ${{ matrix.TYPE }}
