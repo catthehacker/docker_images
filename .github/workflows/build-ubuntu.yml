@@ -209,7 +209,7 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}-${{ env.PART_TAG }}
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         run: ./build.sh
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
