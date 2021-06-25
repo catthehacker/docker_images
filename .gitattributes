@@ -1,0 +1,9 @@
+*    text=auto eol=lf
+
+# scripts
+*.sh  text eol=lf
+*.bat text eol=crlf
+
+## DOCKER
+*.dockerignore text
+Dockerfile     text
