@@ -141,7 +141,6 @@ jobs:
       - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
         if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
         run: ./build.sh
-        shell: sh
         env:
           TAG: runner-${{ matrix.TAG }}
           TYPE: runner
@@ -215,7 +214,19 @@ jobs:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
           TYPE: ${{ matrix.TYPE }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}
+          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          DISTRO: ${{ env.IMAGE }}
+          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+          BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
+
+      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
+        run: ./build.sh
+        if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
+        env:
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
+          TYPE: ${{ matrix.TYPE }}
+          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           DISTRO: ${{ env.IMAGE }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
