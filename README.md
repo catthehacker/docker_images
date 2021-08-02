@@ -49,5 +49,5 @@
 ## Repository contains parts of [`actions/virtual-environments`][actions/virtual-environments] which is licenced under ["MIT License"](https://github.com/actions/virtual-environments/blob/main/LICENSE)
 
 [nektos/act]: https://github.com/nektos/act
-[actions/virtual-environments]: https://github.com/catthehacker/virtual-environments/tree/master/images/linux
-[catthehacker/virtual-environments]: https://github.com/catthehacker/virtual-environments
+[actions/virtual-environments]: https://github.com/actions/virtual-environments
+[catthehacker/virtual-environments]: https://github.com/catthehacker/virtual-environments/tree/master/images/linux
