@@ -18,8 +18,9 @@
 ## Images available
 
 - [catthehacker/virtual-environments][catthehacker/virtual-environments] - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
-
-  - `catthehacker/ubuntu:full-20.04` - this image is updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]
+  - this image is updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]
+    - `catthehacker/ubuntu:full-20.04`
+    - `catthehacker/ubuntu:full-18.04`
 
     see [catthehacker/virtual-environments][catthehacker/virtual-environments] for more information
 
@@ -48,5 +49,5 @@
 ## Repository contains parts of [`actions/virtual-environments`][actions/virtual-environments] which is licenced under ["MIT License"](https://github.com/actions/virtual-environments/blob/main/LICENSE)
 
 [nektos/act]: https://github.com/nektos/act
-[actions/virtual-environments]: https://github.com/actions/virtual-environments
+[actions/virtual-environments]: https://github.com/catthehacker/virtual-environments/tree/master/images/linux
 [catthehacker/virtual-environments]: https://github.com/catthehacker/virtual-environments
