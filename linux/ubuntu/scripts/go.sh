@@ -21,7 +21,10 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   GOPATH="$AGENT_TOOLSDIRECTORY/go/${VER}/x64"
 
   mkdir -v -m 0777 -p "$GOPATH"
-  wget -qO- "https://golang.org/dl/go${VER}.linux-amd64.tar.gz" | tar -zxf - --strip-components=1 -C "$GOPATH"
+  ARCH=$(uname -m)
+  if [ "$ARCH" = x86_64 ]; then ARCH=amd64; fi
+  if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
+  wget -qO- "https://golang.org/dl/go${VER}.linux-$ARCH.tar.gz" | tar -zxf - --strip-components=1 -C "$GOPATH"
 
   ENVVAR="${V//\./_}"
   echo "${ENVVAR}=${GOPATH}" >>/etc/environment
