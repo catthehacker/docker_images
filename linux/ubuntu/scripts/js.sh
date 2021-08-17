@@ -23,7 +23,10 @@ for V in "${versions[@]}"; do
   # disable warning about 'mkdir -m -p'
   # shellcheck disable=SC2174
   mkdir -v -m 0777 -p "$NODEPATH"
-  wget -qO- "https://nodejs.org/download/release/latest-v${V}.x/node-$VER-linux-x64.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
+  ARCH=$(uname -m)
+  if [ "$ARCH" = x86_64 ]; then ARCH=x64; fi
+  if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
+  wget -qO- "https://nodejs.org/download/release/latest-v${V}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
 
   ENVVAR="${V//\./_}"
   echo "${ENVVAR}=${NODEPATH}" >>/etc/environment

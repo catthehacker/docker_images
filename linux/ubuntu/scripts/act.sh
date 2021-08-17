@@ -90,10 +90,13 @@ printf "\n\t🐋 Installed moby-buildx 🐋\t\n"
 docker buildx version
 
 printf "\n\t🐋 Installing Node.JS 🐋\t\n"
+ARCH=$(uname -m)
+if [ "$ARCH" = x86_64 ]; then ARCH=x64; fi
+if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
 VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${NODE_VERSION}\"))][0].version" -r)
-NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/x64"
+NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$ARCH"
 mkdir -v -m 0777 -p "$NODEPATH"
-curl -SsL "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-$VER-linux-x64.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
+curl -SsL "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
 sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
 export PATH="$NODEPATH/bin:$PATH"
 

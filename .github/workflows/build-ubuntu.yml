@@ -18,7 +18,6 @@ on:
 env:
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  PLATFORMS: linux/amd64
   NODE: '14'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
@@ -34,7 +33,17 @@ jobs:
       fail-fast: true
       max-parallel: 4
       matrix:
-        TAG: [latest, 20.04, 18.04, 16.04]
+        include:
+          - TAG: latest
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 20.04
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 18.04
+            PLATFORMS: linux/amd64
+          - TAG: 16.04
+            PLATFORMS: linux/amd64
+    env:
+      PLATFORMS: ${{ matrix.PLATFORMS }}
     steps:
       - name: Login to GitHub Container Registry
         if: ${{ github.repository_owner == github.actor }}
@@ -162,9 +171,27 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        TAG: [latest, 20.04, 18.04]
-        TYPE: [js, pwsh]
+        include:
+          - TAG: latest
+            TYPE: js
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: latest
+            TYPE: pwsh
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 20.04
+            TYPE: js
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 20.04
+            TYPE: pwsh
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 18.04
+            TYPE: js
+            PLATFORMS: linux/amd64
+          - TAG: 18.04
+            TYPE: pwsh
+            PLATFORMS: linux/amd64
     env:
+      PLATFORMS: ${{ matrix.PLATFORMS }}
       BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
       TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
       TYPE: ${{ matrix.TYPE }}
