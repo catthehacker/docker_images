@@ -12,7 +12,7 @@ set -Eeuo pipefail
 printf "\n\t🐋 Installed NPM 🐋\t\n"
 npm -v
 
-versions=("10" "12")
+versions=("10" "12" "14")
 JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-output)
 
 for V in "${versions[@]}"; do
