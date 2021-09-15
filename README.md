@@ -8,8 +8,6 @@
 
 - A package that will be required for action(s) to work properly might be added/removed/changed
 - Any maintenance that will be required due to:
-  - Docker Hub
-  - Quay
   - GitHub Container Registry
   - GitHub Actions
   - Act
