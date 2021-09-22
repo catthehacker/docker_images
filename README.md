@@ -43,7 +43,7 @@
   - `ghcr.io/catthehacker/ubuntu:pwsh-20.04`
   - `ghcr.io/catthehacker/ubuntu:pwsh-latest`
 
-## [`ubuntu-16.04` has been deprecated and will not be updated anymore](https://github.com/actions/virtual-environments/issues/3287)
+## [`ubuntu-16.04` has been deprecated and images for that environment will not be updated anymore](https://github.com/actions/virtual-environments/issues/3287)
 
 ## Repository contains parts of [`actions/virtual-environments`][actions/virtual-environments] which is licenced under ["MIT License"](https://github.com/actions/virtual-environments/blob/main/LICENSE)
 
