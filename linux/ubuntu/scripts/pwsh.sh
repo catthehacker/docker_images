@@ -30,6 +30,8 @@ pwsh -v
 printf "\n\t🐋 Installing PowerShell modules 🐋\t\n"
 modules=("MarkdownPS" "Pester" "PSScriptAnalyzer")
 
+pwsh -nol -nop -c "Set-PSRepository -Name PSGallery -InstallationPolicy Trusted"
+
 for mod in "${modules[@]}"; do
   printf "\n\t🐋 Installing %s 🐋\t\n" "${mod}"
   pwsh -nol -nop -c "Install-Module -Name ${mod} -Scope AllUsers -SkipPublisherCheck -Force"
