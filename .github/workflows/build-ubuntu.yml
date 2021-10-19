@@ -40,8 +40,6 @@ jobs:
             PLATFORMS: linux/amd64,linux/arm64
           - TAG: 18.04
             PLATFORMS: linux/amd64
-          - TAG: 16.04
-            PLATFORMS: linux/amd64
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
     steps:
