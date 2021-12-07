@@ -1,15 +1,9 @@
 #!/bin/bash
 
-# disable warning about 'mkdir -m -p'
-# shellcheck disable=SC2174
-
-# source environment because Linux is beautiful and not really confusing like Windows, also you are apparently not supposed to source that file because it's not conforming to standard shell format but we already fix that in base image
-# yes, this is sarcasm
 # shellcheck disable=SC1091
 . /etc/environment
 
-# no -x because big json
-set -Eeuo pipefail
+set -Eeuxo pipefail
 
 printf "\n\t🐋 Installing Go(lang) 🐋\t\n"
 
@@ -20,6 +14,7 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   VER=$(echo "${JSON}" | jq "[.[] | select(.version|test(\"^${V}\"))][0].version" -r)
   GOPATH="$AGENT_TOOLSDIRECTORY/go/${VER}/x64"
 
+  # shellcheck disable=SC2174
   mkdir -v -m 0777 -p "$GOPATH"
   ARCH=$(uname -m)
   if [ "$ARCH" = x86_64 ]; then ARCH=amd64; fi

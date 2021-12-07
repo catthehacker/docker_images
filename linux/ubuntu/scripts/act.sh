@@ -7,21 +7,21 @@ set -Eeuxo pipefail
 
 printf "\n\t🐋 Build started 🐋\t\n"
 
+# Remove '"' so it can be sourced by sh/bash
 sed 's|"||g' -i "/etc/environment"
 
-echo "USER=$(whoami)" | tee -a "/etc/environment"
-echo "RUNNER_USER=$(whoami)" | tee -a "/etc/environment"
-
 ImageOS=ubuntu$(echo "${FROM_TAG}" | cut -d'.' -f 1)
-echo "IMAGE_OS=$ImageOS" | tee -a "/etc/environment"
-echo "ImageOS=$ImageOS" | tee -a "/etc/environment"
-echo "LSB_RELEASE=${FROM_TAG}" | tee -a "/etc/environment"
-
 AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
-echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY}" | tee -a "/etc/environment"
-echo "RUN_TOOL_CACHE=${AGENT_TOOLSDIRECTORY}" | tee -a "/etc/environment"
-echo "DEPLOYMENT_BASEPATH=/opt/runner" | tee -a "/etc/environment"
-echo ". /etc/environment" | tee -a /etc/profile
+{
+  echo "IMAGE_OS=$ImageOS"
+  echo "ImageOS=$ImageOS"
+  echo "LSB_RELEASE=${FROM_TAG}"
+  echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY}"
+  echo "RUN_TOOL_CACHE=${AGENT_TOOLSDIRECTORY}"
+  echo "DEPLOYMENT_BASEPATH=/opt/runner"
+  echo "USER=$(whoami)"
+  echo "RUNNER_USER=$(whoami)"
+} | tee -a "/etc/environment"
 
 mkdir -m 0777 -p "${AGENT_TOOLSDIRECTORY}"
 chown -R 1001:1000 "${AGENT_TOOLSDIRECTORY}"
@@ -36,6 +36,7 @@ packages=(
   gawk
   curl
   git
+  jq
   wget
   sudo
   gnupg-agent
@@ -50,7 +51,7 @@ packages=(
 )
 
 apt-get -yq update
-apt-get -yq install --no-install-recommends "${packages[@]}"
+apt-get -yq install --no-install-recommends --no-install-suggests "${packages[@]}"
 
 ln -s "$(which python3)" "/usr/local/bin/python"
 
@@ -58,53 +59,65 @@ LSB_OS_VERSION=$(lsb_release -rs | sed 's|\.||g')
 echo "LSB_OS_VERSION=${LSB_OS_VERSION}" | tee -a "/etc/environment"
 
 wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json"
+wget -qO "/imagegeneration/LICENSE" "https://raw.githubusercontent.com/actions/virtual-environments/main/LICENSE"
 
-wget -qO "/usr/bin/jq" "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
-chmod +x "/usr/bin/jq"
+ARCH=$(uname -m)
+if [ "$ARCH" = x86_64 ]; then
+  ARCH=x64
+  wget -qO "/usr/bin/jq" "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
+  chmod +x "/usr/bin/jq"
+fi
+if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
 
 if [[ "${FROM_TAG}" == "16.04" ]]; then
   printf 'git-lfs not available for Xenial'
 else
-  apt-get -yq install --no-install-recommends git-lfs
+  apt-get -yq install --no-install-recommends --no-install-suggests git-lfs
 fi
 
 printf "\n\t🐋 Updated apt lists and upgraded packages 🐋\t\n"
 
 printf "\n\t🐋 Creating ~/.ssh and adding 'github.com' 🐋\t\n"
 mkdir -m 0700 -p ~/.ssh
-ssh-keyscan -t rsa github.com >>/etc/ssh/ssh_known_hosts
-ssh-keyscan -t rsa ssh.dev.azure.com >>/etc/ssh/ssh_known_hosts
+{
+  ssh-keyscan -t rsa github.com
+  ssh-keyscan -t rsa ssh.dev.azure.com
+} >>/etc/ssh/ssh_known_hosts
 
 printf "\n\t🐋 Installed base utils 🐋\t\n"
 
 printf "\n\t🐋 Installing docker cli 🐋\t\n"
-curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-apt-add-repository "https://packages.microsoft.com/ubuntu/${FROM_TAG}/prod"
+curl "https://packages.microsoft.com/config/ubuntu/${FROM_TAG}/prod.list" | tee /etc/apt/sources.list.d/microsoft-prod.list
+wget -q https://packages.microsoft.com/keys/microsoft.asc
+gpg --dearmor <microsoft.asc >/etc/apt/trusted.gpg.d/microsoft.gpg
+apt-key add - <microsoft.asc
+rm microsoft.asc
 apt-get -yq update
-apt-get -yq install --no-install-recommends moby-cli moby-buildx
+apt-get -yq install --no-install-recommends --no-install-suggests moby-cli moby-buildx moby-compose
 
 printf "\n\t🐋 Installed moby-cli 🐋\t\n"
 docker -v
 
 printf "\n\t🐋 Installed moby-buildx 🐋\t\n"
 docker buildx version
+IFS=' ' read -r -a NODE <<<"$NODE_VERSION"
+for ver in "${NODE[@]}"; do
+  printf "\n\t🐋 Installing Node.JS=%s 🐋\t\n" "${ver}"
+  VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
+  NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$ARCH"
+  mkdir -v -m 0777 -p "$NODEPATH"
+  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
+  if [[ "${ver}" == "16" ]]; then
+    sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
+  fi
+  export PATH="$NODEPATH/bin:$PATH"
 
-printf "\n\t🐋 Installing Node.JS 🐋\t\n"
-ARCH=$(uname -m)
-if [ "$ARCH" = x86_64 ]; then ARCH=x64; fi
-if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
-VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${NODE_VERSION}\"))][0].version" -r)
-NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$ARCH"
-mkdir -v -m 0777 -p "$NODEPATH"
-curl -SsL "https://nodejs.org/download/release/latest-v${NODE_VERSION}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
-sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
-export PATH="$NODEPATH/bin:$PATH"
+  printf "\n\t🐋 Installed Node.JS 🐋\t\n"
+  "${NODEPATH}"/bin/node -v
 
-printf "\n\t🐋 Installed Node.JS 🐋\t\n"
-node -v
-
-printf "\n\t🐋 Installed NPM 🐋\t\n"
-npm -v
+  printf "\n\t🐋 Installed NPM 🐋\t\n"
+  "${NODEPATH}"/bin/npm -v
+done
 
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean

@@ -2,6 +2,9 @@
 
 set -Eeuxo pipefail
 
+# shellcheck disable=SC1091
+. /etc/environment
+
 printf "\n\t🐋 Installing PowerShell 🐋\t\n"
 
 # While an linux/amd64 platform installation can use apt-get, the linux/arm64
@@ -12,10 +15,12 @@ printf "\n\t🐋 Installing PowerShell 🐋\t\n"
 # described here:
 # https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7.1#linux
 #
+# TODO: think of a more robust installation for multiple architectures
 
 ARCH=$(uname -m)
 if [ "$ARCH" = x86_64 ]; then ARCH=x64; fi
 if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
+if [ "$ARCH" = armv7l ]; then ARCH=arm32; fi
 VER=$(curl --silent "https://api.github.com/repos/PowerShell/PowerShell/releases/latest" | jq -r .tag_name)
 curl -L -o /tmp/powershell.tar.gz "https://github.com/PowerShell/PowerShell/releases/download/$VER/powershell-${VER:1}-linux-$ARCH.tar.gz"
 sudo mkdir -p "/opt/microsoft/powershell/${VER:1:1}"
@@ -33,6 +38,6 @@ modules=("MarkdownPS" "Pester" "PSScriptAnalyzer")
 pwsh -nol -nop -c "Set-PSRepository -Name PSGallery -InstallationPolicy Trusted"
 
 for mod in "${modules[@]}"; do
-  printf "\n\t🐋 Installing %s 🐋\t\n" "${mod}"
-  pwsh -nol -nop -c "Install-Module -Name ${mod} -Scope AllUsers -SkipPublisherCheck -Force"
+  printf "\n\t🧨 Installing %s 🧨\t\n" "${mod}"
+  pwsh -nol -nop -c "\$ProgressPreference = \"SilentlyContinue\" ; Install-Module -Name ${mod} -Scope AllUsers -SkipPublisherCheck -Force"
 done

@@ -2,8 +2,6 @@
 
 set -Eeuxo pipefail
 
-# source environment because Linux is beautiful and not really confusing like Windows, also you are apparently not supposed to source that file because it's not conforming to standard shell format but we already fix that in base image
-# yes, this is sarcasm
 # shellcheck disable=SC1091
 . /etc/environment
 
@@ -32,8 +30,10 @@ sed "s|PATH=|PATH=${CARGO_HOME}/bin:|g" -i /etc/environment
 cd /root
 ln -sf "${CARGO_HOME}" .cargo
 ln -sf "${RUSTUP_HOME}" .rustup
-echo "RUSTUP_HOME=${RUSTUP_HOME}" >>/etc/environment
-echo "CARGO_HOME=${CARGO_HOME}" >>/etc/environment
+{
+  echo "RUSTUP_HOME=${RUSTUP_HOME}"
+  echo "CARGO_HOME=${CARGO_HOME}"
+} | tee -a /etc/environment
 
 printf "\n\t🐋 Installed RUSTUP 🐋\t\n"
 rustup -V

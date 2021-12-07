@@ -2,6 +2,9 @@
 .secrets
 .env
 
+# wip
+*.hcl
+
 # mega-linter
 report
 
