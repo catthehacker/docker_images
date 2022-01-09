@@ -9,6 +9,7 @@ on:
       - 'linux/ubuntu/**'
     branches:
       - 'master'
+      - 'patch-1'
   pull_request:
     paths:
       - '.github/workflows/build-ubuntu.yml'
@@ -176,17 +177,26 @@ jobs:
           - TAG: latest
             TYPE: pwsh
             PLATFORMS: linux/amd64,linux/arm64
+          - TAG: latest
+            TYPE: rust
+            PLATFORMS: linux/amd64,linux/arm64
           - TAG: 20.04
             TYPE: js
             PLATFORMS: linux/amd64,linux/arm64
           - TAG: 20.04
             TYPE: pwsh
+            PLATFORMS: linux/amd64,linux/arm64
+          - TAG: 20.04
+            TYPE: rust
             PLATFORMS: linux/amd64,linux/arm64
           - TAG: 18.04
             TYPE: js
             PLATFORMS: linux/amd64
           - TAG: 18.04
             TYPE: pwsh
+            PLATFORMS: linux/amd64
+          - TAG: 18.04
+            TYPE: rust
             PLATFORMS: linux/amd64
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
