@@ -9,7 +9,6 @@ on:
       - 'linux/ubuntu/**'
     branches:
       - 'master'
-      - 'patch-1'
   pull_request:
     paths:
       - '.github/workflows/build-ubuntu.yml'
