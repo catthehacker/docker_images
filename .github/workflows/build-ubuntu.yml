@@ -18,7 +18,7 @@ on:
 env:
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '14'
+  NODE: '16'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
 
