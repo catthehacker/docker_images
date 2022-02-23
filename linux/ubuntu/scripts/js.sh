@@ -2,17 +2,28 @@
 
 set -Eeuo pipefail
 
-# source environment because Linux is beautiful and not really confusing like Windows
-# also you are apparently not supposed to source that file because it's not conforming to standard shell envvar
-# format but we already fix that in base image
-# yes, this is sarcasm
 # shellcheck disable=SC1091
 . /etc/environment
 
-printf "\n\t🐋 Installed NPM 🐋\t\n"
-npm -v
+printf "\n\t🐋 Installing NVM tools 🐋\t\n"
+VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r '.tag_name')
+curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/$VERSION/install.sh" | bash
+export NVM_DIR=$HOME/.nvm
+echo "NVM_DIR=$HOME/.nvm" | tee -a /etc/environment
 
-versions=("10" "12")
+# Expressions don't expand in single quotes, use double quotes for that.shellcheck(SC2016)
+# shellcheck disable=SC2016
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' | tee -a /etc/skel/.bash_profile
+
+# Not following: ./nvm.sh was not specified as input (see shellcheck -x).shellcheck(SC1091)
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+printf "\n\t🐋 Installed NVM 🐋\t\n"
+nvm --version
+
+# node 12 and 16 are installed already in act-*
+versions=("14")
 JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-output)
 
 for V in "${versions[@]}"; do
@@ -50,23 +61,6 @@ pnpm -v
 
 printf "\n\t🐋 Installed YARN 🐋\t\n"
 yarn -v
-
-printf "\n\t🐋 Installing NVM tools 🐋\t\n"
-VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | jq -r '.tag_name')
-curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/$VERSION/install.sh" | bash
-export NVM_DIR=$HOME/.nvm
-echo "NVM_DIR=$HOME/.nvm" | tee -a /etc/environment
-
-# Expressions don't expand in single quotes, use double quotes for that.shellcheck(SC2016)
-# shellcheck disable=SC2016
-echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' | tee -a /etc/skel/.bash_profile
-
-# Not following: ./nvm.sh was not specified as input (see shellcheck -x).shellcheck(SC1091)
-# shellcheck disable=SC1091
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-printf "\n\t🐋 Installed NVM 🐋\t\n"
-nvm --version
 
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean

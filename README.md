@@ -16,7 +16,9 @@
 ## Images available
 
 - [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
+
   - this image is updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]
+
     - `ghcr.io/catthehacker/ubuntu:full-latest`
     - `ghcr.io/catthehacker/ubuntu:full-20.04`
     - `ghcr.io/catthehacker/ubuntu:full-18.04`

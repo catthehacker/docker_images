@@ -16,9 +16,11 @@ on:
   workflow_dispatch:
 
 env:
+  IMAGE_LABEL_OWNER: ${{ github.repository_owner }}
+  IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '14'
+  NODE: '12 16'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
 
@@ -28,20 +30,27 @@ defaults:
 
 jobs:
   build-base:
+    name: Build base ${{ matrix.TAG }}
     runs-on: ubuntu-latest
+    env:
+      PLATFORMS: ${{ matrix.PLATFORMS }}
     strategy:
       fail-fast: true
       max-parallel: 4
       matrix:
+        PLATFORMS:
+          - linux/amd64,linux/arm64,linux/armhf
+        TAG:
+          - latest
+          - 20.04
+          - 18.04
         include:
-          - TAG: latest
-            PLATFORMS: linux/amd64,linux/arm64
-          - TAG: 20.04
-            PLATFORMS: linux/amd64,linux/arm64
           - TAG: 18.04
             PLATFORMS: linux/amd64
-    env:
-      PLATFORMS: ${{ matrix.PLATFORMS }}
+        exclude:
+          # no arm bins for docker CLIs
+          - TAG: 18.04
+            PLATFORMS: linux/amd64,linux/arm64,linux/armhf
     steps:
       - name: Login to GitHub Container Registry
         if: ${{ github.repository_owner == github.actor }}
@@ -71,25 +80,24 @@ jobs:
 
       - name: Print tag
         run: |
-          if ${{ github.event_name == 'pull_request' }} && ${{ !env.ACT }} ; then
-            echo "PART_TAG=PR-${{ github.event.number }}" >> $GITHUB_ENV
-          elif ${{ !env.ACT }} ; then
-            echo "PART_TAG=$(date +%Y%m%d)" >> $GITHUB_ENV
+          if ${{ ( github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ) }} ; then
+            echo "PART_TAG=$(date +%Y%m%d)" | tee -a "$GITHUB_ENV"
           else
-            echo "PART_TAG=dev" >> $GITHUB_ENV
+            echo "PART_TAG=dev" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set Ubuntu version to RELEASE
         run: |
           if [ "latest" = "${{ matrix.TAG }}" ]; then
-            echo "RELEASE_TAG=$(lsb_release -rs)" >> $GITHUB_ENV
+            echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
           else
-            echo "RELEASE_TAG=${{ matrix.TAG }}" >> $GITHUB_ENV
+            echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
+      # setup buildkit ourselves so it doesn't create a new one each time act is executed
       - run: |
           docker buildx create \
             --use \
@@ -101,8 +109,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        run: ./build.sh
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        shell: pwsh
         env:
           RUNNER: root
           TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
@@ -111,9 +119,17 @@ jobs:
           FROM_TAG: ${{ env.RELEASE_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: act-${{ matrix.TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        run: ./build.sh
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        shell: pwsh
         env:
           RUNNER: runner
           TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
@@ -122,12 +138,22 @@ jobs:
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: runner-${{ matrix.TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )
 
-      - uses: actions/setup-go@v2
+      - if: ${{ !env.SKIP_TEST }}
+        uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: '^1.16'
 
-      - uses: actions/checkout@v2
+      - if: ${{ !env.SKIP_TEST }}
+        uses: actions/checkout@v2
         with:
           repository: nektos/act
           path: act
@@ -139,21 +165,28 @@ jobs:
           cd act/
           go test ./...
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
-        run: ./build.sh
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
+        shell: pwsh
         env:
-          RUNNER: root
           TAG: act-${{ matrix.TAG }}
           TYPE: act
           FROM_IMAGE: buildpack-deps
           FROM_TAG: ${{ env.RELEASE_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: act-${{ matrix.TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
-        run: ./build.sh
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
+        shell: pwsh
         env:
           RUNNER: runner
           TAG: runner-${{ matrix.TAG }}
@@ -162,40 +195,42 @@ jobs:
           FROM_TAG: act-${{ matrix.TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: runner-${{ matrix.TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )
+
   build-flavours:
+    name: Build ${{ matrix.TYPE }}:${{ matrix.TAG }}
     runs-on: ubuntu-latest
     needs: [build-base]
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        include:
-          - TAG: latest
-            TYPE: js
-            PLATFORMS: linux/amd64,linux/arm64
-          - TAG: latest
-            TYPE: pwsh
-            PLATFORMS: linux/amd64,linux/arm64
-          - TAG: 20.04
-            TYPE: js
-            PLATFORMS: linux/amd64,linux/arm64
-          - TAG: 20.04
-            TYPE: pwsh
-            PLATFORMS: linux/amd64,linux/arm64
-          - TAG: 18.04
-            TYPE: js
-            PLATFORMS: linux/amd64
-          - TAG: 18.04
-            TYPE: pwsh
-            PLATFORMS: linux/amd64
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
       BUILD_TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
-      TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
       TYPE: ${{ matrix.TYPE }}
-      RUNNER: root
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        TAG:
+          - latest
+          - 20.04
+          - 18.04
+        PLATFORMS:
+          - 'linux/amd64'
+        TYPE:
+          - go
+          - js
+          - pwsh
+          - rust
+          - custom
     steps:
       - name: Login to GitHub Container Registry
+        if: ${{ github.repository_owner == github.actor }}
         id: ghcr
         uses: docker/login-action@v1
         with:
@@ -204,6 +239,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to Quay
+        if: ${{ github.repository_owner == github.actor }}
         id: quay
         uses: docker/login-action@v1
         with:
@@ -212,6 +248,7 @@ jobs:
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Login to Docker Hub
+        if: ${{ github.repository_owner == github.actor }}
         id: dckr
         uses: docker/login-action@v1
         with:
@@ -220,20 +257,18 @@ jobs:
 
       - name: Print tag
         run: |
-          if ${{ github.event_name == 'pull_request' }} && ${{ !env.ACT }} ; then
-            echo "PART_TAG=PR-${{ github.event.number }}" >> $GITHUB_ENV
-          elif ${{ !env.ACT }} ; then
-            echo "PART_TAG=$(date +%Y%m%d)" >> $GITHUB_ENV
+          if ${{ ( github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ) }} ; then
+            echo "PART_TAG=$(date +%Y%m%d)" | tee -a "$GITHUB_ENV"
           else
-            echo "PART_TAG=dev" >> $GITHUB_ENV
+            echo "PART_TAG=dev" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set Ubuntu version to RELEASE
         run: |
           if [ "latest" = "${{ matrix.TAG }}" ]; then
-            echo "RELEASE_TAG=$(lsb_release -rs)" >> $GITHUB_ENV
+            echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
           else
-            echo "RELEASE_TAG=${{ matrix.TAG }}" >> $GITHUB_ENV
+            echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU
@@ -250,18 +285,35 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        run: ./build.sh
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        shell: pwsh
         env:
-          TAG: ${{ env.TAG }}-${{ env.PART_TAG }}
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )
 
-      - name: Build and push ${{ env.SLUG }}:${{ env.TAG }}
-        run: ./build.sh
-        if: ${{ ( github.event_name != 'pull_request' && !env.ACT ) }}
+      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+        shell: pwsh
+        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
         env:
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+        run: |
+          ./build.ps1 `
+              -push `
+              -tags @(
+                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
+                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+              )

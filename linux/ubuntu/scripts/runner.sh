@@ -10,8 +10,12 @@ groupadd -g 1001 "${RUNNER}"
 groupadd -g 1000 "${RUNNER}admin"
 useradd -u 1001 -g "${RUNNER}" -G sudo -m -s /bin/bash "${RUNNER}"
 useradd -u 1000 -g "${RUNNER}admin" -G sudo -m -s /bin/bash "${RUNNER}admin"
-echo "${RUNNER} ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
-echo "${RUNNER}admin ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+usermod -aG docker "runner"
+usermod -aG docker "runneradmin"
+{
+  echo "${RUNNER} ALL=(ALL) NOPASSWD: ALL"
+  echo "${RUNNER}admin ALL=(ALL) NOPASSWD: ALL"
+} | tee -a /etc/sudoers
 printf "\n\t🐋 Runner user 🐋\t\n"
 su - "${RUNNER}" -c id
 
@@ -31,8 +35,10 @@ mkdir -p "/home/${RUNNER}/work/_temp"
 chown -R "${RUNNER}":"${RUNNER}" "/home/${RUNNER}/work"
 
 mkdir -m 0700 -p "/home/${RUNNER}/.ssh"
-ssh-keyscan -t rsa github.com >>"/home/${RUNNER}/.ssh/known_hosts"
-ssh-keyscan -t rsa ssh.dev.azure.com >>"/home/${RUNNER}/.ssh/known_hosts"
+{
+  ssh-keyscan -t rsa github.com
+  ssh-keyscan -t rsa ssh.dev.azure.com
+} | tee -a "/home/${RUNNER}/.ssh/known_hosts"
 
 chmod 644 "/home/${RUNNER}/.ssh/known_hosts"
 chown -R "${RUNNER}":"${RUNNER}" "/home/${RUNNER}/.ssh"
