@@ -76,7 +76,7 @@ if [ "$(uname -m)" = x86_64 ]; then
   chmod +x "/usr/bin/jq"
 fi
 
-if [[ "${FROM_TAG}" == "16.04" ]]; then
+if [[ "${VERSION_ID}" == "16.04" ]]; then
   printf 'git-lfs not available for Xenial'
 else
   apt-get -yq install --no-install-recommends --no-install-suggests git-lfs
@@ -94,7 +94,11 @@ mkdir -m 0700 -p ~/.ssh
 printf "\n\t🐋 Installed base utils 🐋\t\n"
 
 printf "\n\t🐋 Installing docker cli 🐋\t\n"
-echo "deb https://packages.microsoft.com/ubuntu/${VERSION_ID}/prod ${VERSION_CODENAME} main" | tee /etc/apt/sources.list.d/microsoft-prod.list
+if [[ "${VERSION_ID}" == "18.04" ]]; then
+  echo "deb https://packages.microsoft.com/ubuntu/${VERSION_ID}/multiarch/prod ${VERSION_CODENAME} main" | tee /etc/apt/sources.list.d/microsoft-prod.list
+else
+  echo "deb https://packages.microsoft.com/ubuntu/${VERSION_ID}/prod ${VERSION_CODENAME} main" | tee /etc/apt/sources.list.d/microsoft-prod.list
+fi
 wget -q https://packages.microsoft.com/keys/microsoft.asc
 gpg --dearmor <microsoft.asc >/etc/apt/trusted.gpg.d/microsoft.gpg
 apt-key add - <microsoft.asc
