@@ -10,12 +10,23 @@ printf "\n\t🐋 Build started 🐋\t\n"
 # Remove '"' so it can be sourced by sh/bash
 sed 's|"||g' -i "/etc/environment"
 
-ImageOS=ubuntu$(echo "${FROM_TAG}" | cut -d'.' -f 1)
+. /etc/os-release
+
+node_arch() {
+  case "$(uname -m)" in
+    'aarch64') echo 'arm64' ;;
+    'x86_64') echo 'x64' ;;
+    'armv7l') echo 'armv7l' ;;
+    *) exit 1 ;;
+  esac
+}
+
+ImageOS=ubuntu$(echo "${VERSION_ID}" | cut -d'.' -f 1)
 AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 {
   echo "IMAGE_OS=$ImageOS"
   echo "ImageOS=$ImageOS"
-  echo "LSB_RELEASE=${FROM_TAG}"
+  echo "LSB_RELEASE=${VERSION_ID}"
   echo "AGENT_TOOLSDIRECTORY=${AGENT_TOOLSDIRECTORY}"
   echo "RUN_TOOL_CACHE=${AGENT_TOOLSDIRECTORY}"
   echo "DEPLOYMENT_BASEPATH=/opt/runner"
@@ -32,7 +43,6 @@ chown -R 1001:1000 /github
 printf "\n\t🐋 Installing packages 🐋\t\n"
 packages=(
   ssh
-  lsb-release
   gawk
   curl
   git
@@ -55,19 +65,16 @@ apt-get -yq install --no-install-recommends --no-install-suggests "${packages[@]
 
 ln -s "$(which python3)" "/usr/local/bin/python"
 
-LSB_OS_VERSION=$(lsb_release -rs | sed 's|\.||g')
+LSB_OS_VERSION=$(echo "${VERSION_ID}" | sed 's|\.||g')
 echo "LSB_OS_VERSION=${LSB_OS_VERSION}" | tee -a "/etc/environment"
 
 wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json"
 wget -qO "/imagegeneration/LICENSE" "https://raw.githubusercontent.com/actions/virtual-environments/main/LICENSE"
 
-ARCH=$(uname -m)
-if [ "$ARCH" = x86_64 ]; then
-  ARCH=x64
+if [ "$(uname -m)" = x86_64 ]; then
   wget -qO "/usr/bin/jq" "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
   chmod +x "/usr/bin/jq"
 fi
-if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
 
 if [[ "${FROM_TAG}" == "16.04" ]]; then
   printf 'git-lfs not available for Xenial'
@@ -87,7 +94,7 @@ mkdir -m 0700 -p ~/.ssh
 printf "\n\t🐋 Installed base utils 🐋\t\n"
 
 printf "\n\t🐋 Installing docker cli 🐋\t\n"
-curl "https://packages.microsoft.com/config/ubuntu/${FROM_TAG}/prod.list" | tee /etc/apt/sources.list.d/microsoft-prod.list
+echo "deb https://packages.microsoft.com/ubuntu/${VERSION_ID}/prod ${VERSION_CODENAME} main" | tee /etc/apt/sources.list.d/microsoft-prod.list
 wget -q https://packages.microsoft.com/keys/microsoft.asc
 gpg --dearmor <microsoft.asc >/etc/apt/trusted.gpg.d/microsoft.gpg
 apt-key add - <microsoft.asc
@@ -104,9 +111,9 @@ IFS=' ' read -r -a NODE <<<"$NODE_VERSION"
 for ver in "${NODE[@]}"; do
   printf "\n\t🐋 Installing Node.JS=%s 🐋\t\n" "${ver}"
   VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
-  NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$ARCH"
+  NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$(node_arch)"
   mkdir -v -m 0777 -p "$NODEPATH"
-  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
+  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
   if [[ "${ver}" == "16" ]]; then
     sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
   fi
