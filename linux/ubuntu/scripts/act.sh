@@ -45,7 +45,6 @@ packages=(
   ssh
   gawk
   curl
-  git
   jq
   wget
   sudo
@@ -65,7 +64,17 @@ apt-get -yq install --no-install-recommends --no-install-suggests "${packages[@]
 
 ln -s "$(which python3)" "/usr/local/bin/python"
 
-LSB_OS_VERSION=$(echo "${VERSION_ID}" | sed 's|\.||g')
+add-apt-repository ppa:git-core/ppa -y
+apt-get update
+apt-get install -y git
+
+git --version
+
+wget https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh -qO- | bash
+apt-get update
+apt-get install -y git-lfs
+
+LSB_OS_VERSION=$(echo "${VERSION_ID//\./}")
 echo "LSB_OS_VERSION=${LSB_OS_VERSION}" | tee -a "/etc/environment"
 
 wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json"
