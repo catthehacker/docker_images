@@ -35,7 +35,6 @@ bash -c "$(curl -sL https://raw.githubusercontent.com/ilikenwf/apt-fast/master/q
 scripts=(
   basic
   pwsh
-  java-tools
   go
   js
   rust

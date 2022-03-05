@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# disable warning about 'mkdir -m -p'
 # shellcheck disable=SC2174
 
 set -Eeuxo pipefail

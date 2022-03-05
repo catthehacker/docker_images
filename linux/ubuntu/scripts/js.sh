@@ -1,8 +1,8 @@
 #!/bin/bash
+# shellcheck disable=SC1091,SC2174,SC2016
 
 set -Eeuo pipefail
 
-# shellcheck disable=SC1091
 . /etc/environment
 
 printf "\n\t🐋 Installing NVM tools 🐋\t\n"
@@ -15,8 +15,6 @@ echo "NVM_DIR=$HOME/.nvm" | tee -a /etc/environment
 # shellcheck disable=SC2016
 echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' | tee -a /etc/skel/.bash_profile
 
-# Not following: ./nvm.sh was not specified as input (see shellcheck -x).shellcheck(SC1091)
-# shellcheck disable=SC1091
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 printf "\n\t🐋 Installed NVM 🐋\t\n"
@@ -31,16 +29,14 @@ for V in "${versions[@]}"; do
   VER=$(echo "${JSON}" | jq "[.[] | select(.version|test(\"^v${V}\"))][0].version" -r)
   NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/x64"
 
-  # disable warning about 'mkdir -m -p'
-  # shellcheck disable=SC2174
   mkdir -v -m 0777 -p "$NODEPATH"
   ARCH=$(uname -m)
   if [ "$ARCH" = x86_64 ]; then ARCH=x64; fi
   if [ "$ARCH" = aarch64 ]; then ARCH=arm64; fi
   wget -qO- "https://nodejs.org/download/release/latest-v${V}.x/node-$VER-linux-$ARCH.tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
 
-  ENVVAR="${V//\./_}"
-  echo "${ENVVAR}=${NODEPATH}" >>/etc/environment
+  # ENVVAR="${V//\./_}"
+  # echo "${ENVVAR}=${NODEPATH}" >>/etc/environment
 
   printf "\n\t🐋 Installed NODE 🐋\t\n"
   "$NODEPATH/bin/node" -v

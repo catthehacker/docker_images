@@ -1,8 +1,8 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 
 set -Eeuxo pipefail
 
-# shellcheck disable=SC1091
 . /etc/environment
 
 printf "\n\t🐋 Installing PowerShell 🐋\t\n"
