@@ -44,13 +44,6 @@ jobs:
           - latest
           - 20.04
           - 18.04
-        include:
-          - TAG: 18.04
-            PLATFORMS: linux/amd64
-        exclude:
-          # no arm bins for docker CLIs
-          - TAG: 18.04
-            PLATFORMS: linux/amd64,linux/arm64,linux/armhf
     steps:
       - name: Login to GitHub Container Registry
         if: ${{ github.repository_owner == github.actor }}

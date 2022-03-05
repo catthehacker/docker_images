@@ -1,7 +1,5 @@
 #!/bin/bash
-
-# disable warning about 'mkdir -m -p'
-# shellcheck disable=SC2174
+# shellcheck disable=SC2174,SC1091
 
 set -Eeuxo pipefail
 
@@ -43,7 +41,6 @@ mkdir -m 0700 -p "/home/${RUNNER}/.ssh"
 chmod 644 "/home/${RUNNER}/.ssh/known_hosts"
 chown -R "${RUNNER}":"${RUNNER}" "/home/${RUNNER}/.ssh"
 
-# shellcheck disable=SC1091
 . /etc/environment
 
 # Word is of the form "A"B"C" (B indicated). Did you mean "ABC" or "A\"B\"C"?shellcheck(SC2140)

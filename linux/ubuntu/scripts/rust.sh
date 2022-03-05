@@ -1,8 +1,8 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 
 set -Eeuxo pipefail
 
-# shellcheck disable=SC1091
 . /etc/environment
 
 export RUSTUP_HOME=/usr/share/rust/.rustup
@@ -15,7 +15,6 @@ apt-get -yq install build-essential llvm
 printf "\n\t🐋 Installing Rust 🐋\t\n"
 curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable --profile=minimal
 
-# shellcheck disable=SC1091
 source "${CARGO_HOME}/env"
 
 rustup component add rustfmt clippy
