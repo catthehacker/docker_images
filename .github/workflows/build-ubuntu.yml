@@ -42,6 +42,7 @@ jobs:
           - linux/amd64,linux/arm64,linux/armhf
         TAG:
           - latest
+          - 22.04
           - 20.04
           - 18.04
     steps:
@@ -211,6 +212,7 @@ jobs:
       matrix:
         TAG:
           - latest
+          - 22.04
           - 20.04
           - 18.04
         PLATFORMS:
