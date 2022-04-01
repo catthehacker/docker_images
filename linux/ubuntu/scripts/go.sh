@@ -26,7 +26,7 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   # hack
   # TODO: i hate shell scripts, please can I have powershell on linux and no, python is not a solution, it should die
   # TODO: write own thing to get links from go.dev and versions from actions/go-versions, mash it together, ?????, works
-  if [[ "$(echo ${VER} | cut-d. -f3)" == "0" ]]; then
+  if [[ "$(echo ${VER} | cut -d. -f3)" == "0" ]]; then
     DL_VER=$(echo "${VER}" | cut -d. -f-2)
   fi
   wget -qO- "https://golang.org/dl/go${DL_VER}.linux-$(go_arch).tar.gz" | tar -zxf - --strip-components=1 -C "$GOPATH"
