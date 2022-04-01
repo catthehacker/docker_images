@@ -100,7 +100,7 @@ jobs:
             --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
             --platform "${{ env.PLATFORMS }}"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         shell: pwsh
@@ -146,7 +146,7 @@ jobs:
           go-version: '^1.16'
 
       - if: ${{ !env.SKIP_TEST }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: nektos/act
           path: act
@@ -276,7 +276,7 @@ jobs:
             --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
             --platform "${{ env.PLATFORMS }}"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         shell: pwsh
