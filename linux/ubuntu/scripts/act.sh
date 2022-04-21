@@ -75,18 +75,12 @@ apt-get install -y git-lfs
 LSB_OS_VERSION="${VERSION_ID//\./}"
 echo "LSB_OS_VERSION=${LSB_OS_VERSION}" | tee -a "/etc/environment"
 
-wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json"
+wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json" || echo "File not available"
 wget -qO "/imagegeneration/LICENSE" "https://raw.githubusercontent.com/actions/virtual-environments/main/LICENSE"
 
 if [ "$(uname -m)" = x86_64 ]; then
   wget -qO "/usr/bin/jq" "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
   chmod +x "/usr/bin/jq"
-fi
-
-if [[ "${VERSION_ID}" == "16.04" ]]; then
-  printf 'git-lfs not available for Xenial'
-else
-  apt-get -yq install --no-install-recommends --no-install-suggests git-lfs
 fi
 
 printf "\n\t🐋 Updated apt lists and upgraded packages 🐋\t\n"
