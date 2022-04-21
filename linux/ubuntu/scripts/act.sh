@@ -83,12 +83,6 @@ if [ "$(uname -m)" = x86_64 ]; then
   chmod +x "/usr/bin/jq"
 fi
 
-if [[ "${VERSION_ID}" == "16.04" ]]; then
-  printf 'git-lfs not available for Xenial'
-else
-  apt-get -yq install --no-install-recommends --no-install-suggests git-lfs
-fi
-
 printf "\n\t🐋 Updated apt lists and upgraded packages 🐋\t\n"
 
 printf "\n\t🐋 Creating ~/.ssh and adding 'github.com' 🐋\t\n"
