@@ -10,7 +10,7 @@ export CARGO_HOME=/usr/share/rust/.cargo
 
 printf "\n\t🐋 Installing dependencies 🐋\t\n"
 apt-get -yq update
-apt-get -yq install build-essential llvm
+apt-get -yq install build-essential llvm libssl-dev
 
 printf "\n\t🐋 Installing Rust 🐋\t\n"
 curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable --profile=minimal
