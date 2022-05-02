@@ -4,6 +4,7 @@
 set -Eeuxo pipefail
 
 . /etc/environment
+. /imagegeneration/installers/helpers/os.sh
 
 export RUSTUP_HOME=/usr/share/rust/.rustup
 export CARGO_HOME=/usr/share/rust/.cargo
@@ -18,7 +19,11 @@ curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable --profil
 source "${CARGO_HOME}/env"
 
 rustup component add rustfmt clippy
-cargo install --locked bindgen cbindgen cargo-audit cargo-outdated
+if isUbuntuVer "22"; then
+  cargo install bindgen cbindgen cargo-audit cargo-outdated
+else
+  cargo install --locked bindgen cbindgen cargo-audit cargo-outdated
+fi
 chmod -R 777 "$(dirname "${RUSTUP_HOME}")"
 
 # cleanup
