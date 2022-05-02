@@ -14,6 +14,17 @@ function isUbuntu20() {
   [[ "${VERSION_ID}" =~ ^20\.(.*)$ ]]
 }
 
+function isUbuntu22() {
+  . /etc/os-release
+  [[ "${VERSION_ID}" =~ ^22\.(.*)$ ]]
+}
+
+function isUbuntuVer() {
+  local ver=$1
+  . /etc/os-release
+  [[ "${VERSION_ID}" =~ ^$ver\.(.*)$ ]]
+}
+
 function getOSVersionLabel() {
   . /etc/os-release
   echo "${VERSION_CODENAME}"
