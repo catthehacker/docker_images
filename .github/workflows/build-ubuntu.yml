@@ -89,7 +89,7 @@ jobs:
           fi
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       # setup buildkit ourselves so it doesn't create a new one each time act is executed
       - run: |
@@ -270,7 +270,7 @@ jobs:
           fi
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - run: |
           docker buildx create \
