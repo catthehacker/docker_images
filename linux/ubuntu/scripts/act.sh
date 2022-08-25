@@ -55,6 +55,7 @@ packages=(
   zip
   unzip
   xz-utils
+  gh
 )
 
 apt-get -yq update
