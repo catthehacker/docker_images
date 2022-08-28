@@ -55,7 +55,6 @@ packages=(
   zip
   unzip
   xz-utils
-  gh
 )
 
 apt-get -yq update
@@ -131,6 +130,11 @@ for ver in "${NODE[@]}"; do
   printf "\n\t🐋 Installed NPM 🐋\t\n"
   "${NODEPATH}"/bin/npm -v
 done
+
+# Install GitHub CLI
+url=$(curl -s https://api.github.com/repos/cli/cli/releases/latest | jq -r ".assets[].browser_download_url|select(contains(\"linux\") and contains(\"$(arch)\") and contains(\".deb\"))")
+wget -q "$url" -O "/tmp/gh.deb"
+apt install /tmp/gh.deb
 
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
