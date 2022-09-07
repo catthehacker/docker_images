@@ -55,6 +55,9 @@ packages=(
   zip
   unzip
   xz-utils
+  python3-pip
+  python3-venv
+  pipx
 )
 
 apt-get -yq update
