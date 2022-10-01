@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint
-        uses: megalinter/megalinter/flavors/documentation@v5.13.0
+        uses: megalinter/megalinter/flavors/documentation@v6.10.0
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
