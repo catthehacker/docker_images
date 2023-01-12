@@ -39,6 +39,8 @@ param(
 
 $basetags = @()
 
+$regstryid = $(& (Get-Command 'docker').source run --rm -d -p 8192:5000 registry:2)
+
 ForEach($platform in $platforms.Split(",")) {
     $arguments = @(
         'buildx',
@@ -47,7 +49,7 @@ ForEach($platform in $platforms.Split(",")) {
 
     $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
 
-    $intermediatetag = "intermediate:$($platform.Replace("/", "-"))"
+    $intermediatetag = "localhost:8192/intermediate:$($platform.Replace("/", "-"))"
 
     $arguments += @(
         "--tag=${intermediatetag}",
@@ -72,6 +74,7 @@ ForEach($platform in $platforms.Split(",")) {
 
     & (Get-Command 'docker').source $arguments
 
+    # Not using buildx here, because buildx doesn't like a localhost registry
     $arguments = @(
         'build'
     )
@@ -93,16 +96,21 @@ ForEach($platform in $platforms.Split(",")) {
     $arguments += @(
         "--tag=${intermediatetag}",
         "--file=./Dockerfile.tmp",
-        "--platform=${platform}",
         '.'
     )
 
     & (Get-Command 'docker').source $arguments
 
+    & (Get-Command 'docker').source push ${intermediatetag}
+
     $basetags += @("${intermediatetag}")
 }
 
 $arguments = @()
+
+if($push -ne $true) {
+   $arguments += @("--dry-run")
+}
 
 $tags.Count -ne 0 ? ($tags | ForEach-Object { $arguments += @("--tag=$_") }) : ""
 
@@ -110,6 +118,4 @@ $arguments += $tag -ne '' ? @("--tag=$tag") : @()
 
 & (Get-Command 'docker').source buildx imagetools create $arguments $basetags
 
-if($push -eq $true) {
-    & (Get-Command 'docker').source push $arguments
-}
+& (Get-Command 'docker').source stop $regstryid
