@@ -66,38 +66,34 @@ ForEach($platform in $platforms.Split(",")) {
         "--build-arg=FROM_TAG=${from_tag}",
         "--file=./linux/${image}/Dockerfile",
         "--platform=${platform}",
-        "--output=type=image",
+        "--load",
         '.'
     )
 
     & (Get-Command 'docker').source $arguments
 
     $arguments = @(
-        'buildx',
         'build'
     )
 
     $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
 
-    $imageid = $(& (Get-Command 'docker').source docker create "${intermediatetag}")
+    $imageid = $(& (Get-Command 'docker').source create "${intermediatetag}")
 
-    $envfileContent = $(& (Get-Command 'docker').source docker export "${imageid}" | tar x --to-stdout etc/environment)
+    $envfileContent = $(& (Get-Command 'docker').source cp "${imageid}:/etc/environment" - | tar x --to-stdout)
 
-    & (Get-Command 'docker').source docker rm "${imageid}"
+    & (Get-Command 'docker').source rm "${imageid}"
 
-    echo 'FROM ${intermediatetag}
-    ' > Dockerfile.tmp
+    echo "FROM ${intermediatetag}" > Dockerfile.tmp
 
     ForEach($envline in $envfileContent.Split("\n")) {
-        echo 'ENV $envline
-        ' >> Dockerfile.tmp
+        echo "ENV $envline" >> Dockerfile.tmp
     }
 
     $arguments += @(
         "--tag=${intermediatetag}",
         "--file=./Dockerfile.tmp",
         "--platform=${platform}",
-        "--output=type=image",
         '.'
     )
 
@@ -112,7 +108,7 @@ $tags.Count -ne 0 ? ($tags | ForEach-Object { $arguments += @("--tag=$_") }) : "
 
 $arguments += $tag -ne '' ? @("--tag=$tag") : @()
 
-& (Get-Command 'docker').source docker buildx imagetools create $arguments $basetags
+& (Get-Command 'docker').source buildx imagetools create $arguments $basetags
 
 if($push -eq $true) {
     & (Get-Command 'docker').source push $arguments
