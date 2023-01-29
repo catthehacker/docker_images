@@ -44,7 +44,6 @@ jobs:
           - latest
           - 22.04
           - 20.04
-          - 18.04
     steps:
       - name: Login to GitHub Container Registry
         if: ${{ github.repository_owner == github.actor }}
@@ -210,14 +209,10 @@ jobs:
       fail-fast: false
       max-parallel: 8
       matrix:
-        exclude:
-          - TAG: 18.04
-            TYPE: custom
         TAG:
           - latest
           - 22.04
           - 20.04
-          - 18.04
         PLATFORMS:
           - 'linux/amd64'
         TYPE:
