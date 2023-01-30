@@ -16,11 +16,11 @@ $VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.sh
 
 # workaround https://github.com/microsoft/vcpkg/issues/27786
 
-mkdir -p /root/.vcpkg/ $HOME/.vcpkg
-touch /root/.vcpkg/vcpkg.path.txt $HOME/.vcpkg/vcpkg.path.txt
+mkdir -p /root/.vcpkg/
+touch /root/.vcpkg/vcpkg.path.txt
 
 $VCPKG_INSTALLATION_ROOT/vcpkg integrate install
 chmod 0777 -R $VCPKG_INSTALLATION_ROOT
 ln -sf $VCPKG_INSTALLATION_ROOT/vcpkg /usr/local/bin
 
-rm -rf /root/.vcpkg $HOME/.vcpkg
+rm -rf /root/.vcpkg
