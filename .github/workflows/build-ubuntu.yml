@@ -298,7 +298,7 @@ jobs:
         shell: pwsh
         if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
         env:
-          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
