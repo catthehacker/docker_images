@@ -11,3 +11,5 @@ cmd_packages=$(jq -r ".apt.cmd_packages[]" "/imagegeneration/toolset.json")
 # we depend on re-splitting behaviour here
 # shellcheck disable=SC2068
 apt-get install -y --no-install-recommends ${common_packages[@]} ${cmd_packages[@]}
+apt-get update -y -qq
+apt-get install -y fd-find ripgrep curl wget sed moreutils jq apt-utils
