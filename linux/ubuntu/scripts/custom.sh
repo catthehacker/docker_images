@@ -39,6 +39,7 @@ scripts=(
   js
   rust
   vcpkg
+  mytools #keep last
 )
 
 for SCRIPT in "${scripts[@]}"; do
