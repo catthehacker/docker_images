@@ -119,22 +119,22 @@ jobs:
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
               )
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
-        env:
-          RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          TYPE: runner
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: runner-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-              )
+      #- name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+      #  shell: pwsh
+      #  env:
+      #    RUNNER: runner
+      #    TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
+      #    TYPE: runner
+      #    FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+      #    FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
+      #    BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+      #    BUILD_TAG: runner-${{ matrix.TAG }}
+      #  run: |
+      #    ./build.ps1 `
+      #        -push `
+      #        -tags @(
+      #          'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+      #        )
 
       - if: ${{ !env.SKIP_TEST }}
         uses: actions/setup-go@v3
@@ -171,23 +171,23 @@ jobs:
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
               )
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
-        env:
-          RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}
-          TYPE: runner
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: runner-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-              )
+      #- name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+      #  if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
+      #  shell: pwsh
+      #  env:
+      #    RUNNER: runner
+      #    TAG: runner-${{ matrix.TAG }}
+      #    TYPE: runner
+      #    FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+      #    FROM_TAG: act-${{ matrix.TAG }}
+      #    BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+      #    BUILD_TAG: runner-${{ matrix.TAG }}
+      #  run: |
+      #    ./build.ps1 `
+      #        -push `
+      #        -tags @(
+      #          'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+      #        )
 
   build-flavours:
     name: Build ${{ matrix.TYPE }}:${{ matrix.TAG }}
