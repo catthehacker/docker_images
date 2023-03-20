@@ -117,28 +117,24 @@ jobs:
               -push `
               -tags @(
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
               )
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
-        env:
-          RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          TYPE: runner
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: runner-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+      #- name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+      #  shell: pwsh
+      #  env:
+      #    RUNNER: runner
+      #    TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
+      #    TYPE: runner
+      #    FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+      #    FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
+      #    BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+      #    BUILD_TAG: runner-${{ matrix.TAG }}
+      #  run: |
+      #    ./build.ps1 `
+      #        -push `
+      #        -tags @(
+      #          'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+      #        )
 
       - if: ${{ !env.SKIP_TEST }}
         uses: actions/setup-go@v3
@@ -173,29 +169,25 @@ jobs:
               -push `
               -tags @(
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
               )
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
-        env:
-          RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}
-          TYPE: runner
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: runner-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+      #- name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
+      #  if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
+      #  shell: pwsh
+      #  env:
+      #    RUNNER: runner
+      #    TAG: runner-${{ matrix.TAG }}
+      #    TYPE: runner
+      #    FROM_IMAGE: ghcr.io/${{ env.SLUG }}
+      #    FROM_TAG: act-${{ matrix.TAG }}
+      #    BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+      #    BUILD_TAG: runner-${{ matrix.TAG }}
+      #  run: |
+      #    ./build.ps1 `
+      #        -push `
+      #        -tags @(
+      #          'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
+      #        )
 
   build-flavours:
     name: Build ${{ matrix.TYPE }}:${{ matrix.TAG }}
@@ -211,15 +203,15 @@ jobs:
       matrix:
         TAG:
           - latest
-          - 22.04
-          - 20.04
+          #- 22.04
+          #- 20.04
         PLATFORMS:
           - 'linux/amd64'
         TYPE:
-          - go
-          - js
-          - pwsh
-          - rust
+          #- go
+          #- js
+          #- pwsh
+          #- rust
           - custom
     steps:
       - name: Login to GitHub Container Registry
@@ -230,23 +222,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to Quay
-        if: ${{ github.repository_owner == github.actor }}
-        id: quay
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
-
-      - name: Login to Docker Hub
-        if: ${{ github.repository_owner == github.actor }}
-        id: dckr
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Print tag
         run: |
@@ -290,8 +265,6 @@ jobs:
               -push `
               -tags @(
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
               )
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
@@ -307,6 +280,4 @@ jobs:
               -push `
               -tags @(
                 'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
               )
