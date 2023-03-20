@@ -203,8 +203,8 @@ jobs:
       matrix:
         TAG:
           - latest
-          - 22.04
-          - 20.04
+          #- 22.04
+          #- 20.04
         PLATFORMS:
           - 'linux/amd64'
         TYPE:
