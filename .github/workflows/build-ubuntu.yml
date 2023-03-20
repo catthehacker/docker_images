@@ -208,10 +208,10 @@ jobs:
         PLATFORMS:
           - 'linux/amd64'
         TYPE:
-          - go
-          - js
-          - pwsh
-          - rust
+          #- go
+          #- js
+          #- pwsh
+          #- rust
           - custom
     steps:
       - name: Login to GitHub Container Registry
