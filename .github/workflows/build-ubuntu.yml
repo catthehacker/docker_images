@@ -220,6 +220,7 @@ jobs:
           - js
           - pwsh
           - rust
+          - dotnet
           - custom
     steps:
       - name: Login to GitHub Container Registry
