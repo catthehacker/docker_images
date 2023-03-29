@@ -20,7 +20,7 @@ env:
   IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '12 16'
+  NODE: '16'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
 
