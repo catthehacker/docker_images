@@ -26,7 +26,8 @@ function replaceEtcEnvironmentVariable {
     variable_value="$2"
 
     # modify /etc/environemnt in place by replacing a string that begins with variable_name
-    sudo sed -i -e "s%^${variable_name}=.*$%${variable_name}=\"${variable_value}\"%" /etc/environment
+    # removed quotes for the docker env metadata reader
+    sudo sed -i -e "s%^${variable_name}=.*$%${variable_name}=${variable_value}%" /etc/environment
 }
 
 function setEtcEnvironmentVariable {

@@ -6,6 +6,8 @@
 ################################################################################
 
 # Install dotnet CLI
+. /imagegeneration/installers/helpers/etc-environment.sh
+
 printf "\n\t🐋 Installing .NET 🐋\t\n"
 #apt-get install -y dotnet-sdk-7.0 dotnet-sdk-6.0 dotnet-runtime-7.0 dotnet-runtime-6.0
 curl -LO https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh
@@ -17,8 +19,9 @@ export DOTNET_ROOT=/opt/hostedtoolcache/dotnet
 export PATH=$PATH:$DOTNET_ROOT
 {
   echo "DOTNET_ROOT=${DOTNET_ROOT}"
-  echo "PATH=\$PATH:\$DOTNET_ROOT"
 } | tee -a /etc/environment
+
+appendEtcEnvironmentPath "${DOTNET_ROOT}"
 
 which dotnet
 dotnet --version
