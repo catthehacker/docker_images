@@ -43,10 +43,12 @@ for V in "${versions[@]}"; do
 done
 
 # npm timeout under qemu with defaults
-npm config set fetch-timeout 60000
+npm config set fetch-timeout 120000
 npm config set fetch-retry-mintimeout 120000
-npm config set fetch-retry-maxtimeout 240000
+npm config set fetch-retry-maxtimeout 120000
 npm config set prefer-offline true
+# Otherwise there are no log updates for 10m+ on qemu
+npm config set loglevel verbose
 npm config ls -l
 
 printf "\n\t🐋 Installing JS tools 🐋\t\n"
