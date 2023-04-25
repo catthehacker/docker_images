@@ -42,6 +42,9 @@ for V in "${versions[@]}"; do
   "$NODEPATH/bin/node" -v
 done
 
+npm config set fetch-retry-mintimeout 60000
+npm config set fetch-retry-maxtimeout 240000
+
 printf "\n\t🐋 Installing JS tools 🐋\t\n"
 npm install -g npm
 npm install -g pnpm
