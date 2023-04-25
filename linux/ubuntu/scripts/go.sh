@@ -37,7 +37,7 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   printf "\n\t🐋 Installed GO 🐋\t\n"
   "$GOPATH/bin/go" version
 
-  if [[ "${V}" == "1.15.*" ]]; then
+  if [[ "${V}" == "1.20.*" ]]; then
     ln -s "$GOPATH/bin/*" /usr/bin/
   fi
 done
