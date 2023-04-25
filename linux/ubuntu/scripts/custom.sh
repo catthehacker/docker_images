@@ -39,6 +39,7 @@ scripts=(
   js
   rust
   vcpkg
+  dotnet
 )
 
 for SCRIPT in "${scripts[@]}"; do
