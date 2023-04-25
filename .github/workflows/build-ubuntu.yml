@@ -213,15 +213,29 @@ jobs:
           - latest
           - 22.04
           - 20.04
-        PLATFORMS:
-          - 'linux/amd64'
         TYPE:
           - go
           - js
           - pwsh
           - rust
           - dotnet
+          - java-tools
           - custom
+        include:
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: go
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: js
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: pwsh
+          - PLATFORMS: linux/amd64
+            TYPE: rust
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: dotnet
+          - PLATFORMS: linux/amd64
+            TYPE: java-tools
+          - PLATFORMS: linux/amd64
+            TYPE: custom
     steps:
       - name: Login to GitHub Container Registry
         if: ${{ github.repository_owner == github.actor }}
