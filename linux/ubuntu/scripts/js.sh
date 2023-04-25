@@ -42,8 +42,12 @@ for V in "${versions[@]}"; do
   "$NODEPATH/bin/node" -v
 done
 
-npm config set fetch-retry-mintimeout 60000
+# npm timeout under qemu with defaults
+npm config set fetch-timeout 60000
+npm config set fetch-retry-mintimeout 120000
 npm config set fetch-retry-maxtimeout 240000
+npm config set prefer-offline true
+npm config ls -l
 
 printf "\n\t🐋 Installing JS tools 🐋\t\n"
 npm install -g npm
@@ -64,4 +68,6 @@ yarn -v
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
 rm -rf /var/cache/* /var/log/* /var/lib/apt/lists/* /tmp/* || echo 'Failed to delete directories'
+# remove npm config
+npm config edit --editor rm
 printf "\n\t🐋 Cleaned up image 🐋\t\n"
