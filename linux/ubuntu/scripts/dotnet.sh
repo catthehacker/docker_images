@@ -21,7 +21,7 @@ export PATH=$PATH:$DOTNET_ROOT
   echo "DOTNET_ROOT=${DOTNET_ROOT}"
 } | tee -a /etc/environment
 
-appendEtcEnvironmentPath "${DOTNET_ROOT}"
+prependEtcEnvironmentPath "${DOTNET_ROOT}"
 
 which dotnet
 dotnet --version
