@@ -118,7 +118,9 @@ for ver in "${NODE[@]}"; do
   VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
   NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$(node_arch)"
   mkdir -v -m 0777 -p "$NODEPATH"
-  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
+  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" -O "node-$VER-linux-$(node_arch).tar.xz"
+  tar -Jxf "node-$VER-linux-$(node_arch).tar.xz" --strip-components=1 -C "$NODEPATH"
+  rm "node-$VER-linux-$(node_arch).tar.xz"
   if [[ "${ver}" == "16" ]]; then
     sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
   fi
