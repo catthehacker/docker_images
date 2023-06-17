@@ -10,7 +10,8 @@ ARG FROM_IMAGE
 ARG FROM_TAG
 
 # > Our custom ARGs
-ARG NODE_VERSION="12 16"
+# latest Node.js LTS versions
+ARG NODE_VERSION="16 18"
 ARG DISTRO=ubuntu
 ARG TYPE=act
 ARG RUNNER
