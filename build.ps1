@@ -47,7 +47,7 @@ ForEach($platform in $platforms.Split(",")) {
         'build'
     )
 
-    $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
+    $arguments += $progress -ne '' ? @("--progress=$progress") : @("--progress=plain")
 
     $intermediatetag = "localhost:8192/intermediate:$($platform.Replace("/", "-"))"
 
@@ -79,7 +79,7 @@ ForEach($platform in $platforms.Split(",")) {
         'build'
     )
 
-    $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
+    $arguments += $progress -ne '' ? @("--progress=$progress") : @("--progress=plain")
 
     $imageid = $(& (Get-Command 'docker').source create "${intermediatetag}")
 
