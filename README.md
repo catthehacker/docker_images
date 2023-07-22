@@ -16,13 +16,9 @@
 ## Images available
 
 - [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
-
-  - this image is updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]
-
+  - this image is ~~updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]~~ outdated, don't use
     - `ghcr.io/catthehacker/ubuntu:full-latest`
     - `ghcr.io/catthehacker/ubuntu:full-20.04`
-
-    see [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] for more information
 
 - [`/linux/ubuntu/act`](./linux/ubuntu/scripts/act.sh) - image used in [github.com/nektos/act][nektos/act] as medium size image retaining compatibility with most actions while maintaining small size
   - `ghcr.io/catthehacker/ubuntu:act-20.04`
