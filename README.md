@@ -33,6 +33,9 @@
   - `ghcr.io/catthehacker/ubuntu:js-22.04`
   - `ghcr.io/catthehacker/ubuntu:js-latest`
 - [`/linux/ubuntu/rust`](./linux/ubuntu/scripts/rust.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `rust` tools installed (`rustfmt`, `clippy`, `cbindgen`, etc.)
+  - `ghcr.io/catthehacker/ubuntu:rust-20.04`
+  - `ghcr.io/catthehacker/ubuntu:rust-22.04`
+  - `ghcr.io/catthehacker/ubuntu:rust-latest`
 - [`/linux/ubuntu/pwsh`](./linux/ubuntu/scripts/pwsh.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `pwsh` tools and modules installed
   - `ghcr.io/catthehacker/ubuntu:pwsh-20.04`
   - `ghcr.io/catthehacker/ubuntu:pwsh-22.04`
