@@ -121,7 +121,7 @@ for ver in "${NODE[@]}"; do
   wget "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" -O "node-$VER-linux-$(node_arch).tar.xz"
   tar -Jxf "node-$VER-linux-$(node_arch).tar.xz" --strip-components=1 -C "$NODEPATH"
   rm "node-$VER-linux-$(node_arch).tar.xz"
-  if [[ "${ver}" == "16" ]]; then
+  if [[ "${ver}" == "18" ]]; then  # make this version the default (latest LTS)
     sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
   fi
   export PATH="$NODEPATH/bin:$PATH"

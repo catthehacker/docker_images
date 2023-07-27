@@ -28,7 +28,7 @@
   - `ghcr.io/catthehacker/ubuntu:runner-20.04`
   - `ghcr.io/catthehacker/ubuntu:runner-22.04`
   - `ghcr.io/catthehacker/ubuntu:runner-latest`
-- [`/linux/ubuntu/js`](./linux/ubuntu/scripts/js.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `js` tools installed (`yarn`, `nvm`, `node` v10/v12, `pnpm`, `grunt`, etc.)
+- [`/linux/ubuntu/js`](./linux/ubuntu/scripts/js.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `js` tools installed (`yarn`, `nvm`, `node` v16/v18, `pnpm`, `grunt`, etc.)
   - `ghcr.io/catthehacker/ubuntu:js-20.04`
   - `ghcr.io/catthehacker/ubuntu:js-22.04`
   - `ghcr.io/catthehacker/ubuntu:js-latest`
