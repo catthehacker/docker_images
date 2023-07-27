@@ -34,6 +34,9 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   # ENVVAR="${V//\./_}"
   # echo "${ENVVAR}=${GOPATH}" >>/etc/environment
 
+  # Create a complete file
+  touch "${GOPATH}.complete"
+
   printf "\n\t🐋 Installed GO 🐋\t\n"
   "$GOPATH/bin/go" version
 
