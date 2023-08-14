@@ -39,16 +39,16 @@ param(
 
 function exec() {
     $path, $myargs = $args
-    $proc=Start-Process -Wait -PassThru -FilePath $path -Args $myargs
+    $proc = Start-Process -Wait -PassThru -FilePath "$path" -ArgumentList $myargs
     if($proc.ExitCode -ne 0) {
-    throw "$args failed with exit code $proc.ExitCode"
+        throw "$args failed with exit code $proc.ExitCode"
     }
 }
 function exec_out() {
     $path, $myargs = $args
     $stdout = "$(& "$path" $myargs)"
     if($LASTEXITCODE -ne 0) {
-    throw "$args failed with exit code $LASTEXITCODE, error: $stdout"
+        throw "$args failed with exit code $LASTEXITCODE, error: $stdout"
     }
     return "$stdout"
 }
