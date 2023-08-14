@@ -37,15 +37,22 @@ param(
     [switch]$push
 )
 
+# https://stackoverflow.com/a/33545660
+function Flatten-Array{
+    $input | ForEach-Object{
+        if ($_ -is [array]){$_ | Flatten-Array}else{$_}
+    } | Where-Object{![string]::IsNullorEmpty($_)}
+}
+
 function exec() {
-    $path, $myargs = $args
+    $path, $myargs = $args | Flatten-Array
     $proc = Start-Process -Wait -PassThru -FilePath "$path" -ArgumentList $myargs
     if($proc.ExitCode -ne 0) {
         throw "$args failed with exit code $proc.ExitCode"
     }
 }
 function exec_out() {
-    $path, $myargs = $args
+    $path, $myargs = $args | Flatten-Array
     $stdout = "$(& "$path" $myargs)"
     if($LASTEXITCODE -ne 0) {
         throw "$args failed with exit code $LASTEXITCODE, error: $stdout"
@@ -96,7 +103,7 @@ ForEach($platform in $platforms.Split(",")) {
         $arguments += "--env","$envline"
     }
     $arguments += @("$containerName-container")
-    exec $arguments 
+    exec $arguments
     exec buildah unmount "$containerName-container"
     exec buildah commit --format=docker "$containerName-container" "$containerName-image"
     exec buildah manifest add "$manifest" "$containerName-image"
