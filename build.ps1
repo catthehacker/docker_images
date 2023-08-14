@@ -48,14 +48,14 @@ function exec() {
     $path, $myargs = $args | Flatten-Array
     $proc = Start-Process -Wait -PassThru -FilePath "$path" -ArgumentList $myargs
     if($proc.ExitCode -ne 0) {
-        throw "$args failed with exit code $proc.ExitCode"
+        throw "$($args | Flatten-Array) failed with exit code $($proc.ExitCode)"
     }
 }
 function exec_out() {
     $path, $myargs = $args | Flatten-Array
     $stdout = "$(& "$path" $myargs)"
     if($LASTEXITCODE -ne 0) {
-        throw "$args failed with exit code $LASTEXITCODE, error: $stdout"
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE, error: $stdout"
     }
     return "$stdout"
 }
@@ -71,7 +71,6 @@ ForEach($platform in $platforms.Split(",")) {
         "buildah",
         "build"
         "--format=docker",
-        "--tag=${intermediatetag}",
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
         "--build-arg=TYPE=${type}",
@@ -87,6 +86,7 @@ ForEach($platform in $platforms.Split(",")) {
         "--build-arg=FROM_TAG=${from_tag}",
         "--file=./linux/${image}/Dockerfile",
         "--platform=${platform}",
+        "--tag=${intermediatetag}",
         '.'
     )
 
