@@ -46,9 +46,9 @@ function Flatten-Array{
 
 function exec() {
     $path, $myargs = $args | Flatten-Array
-    $proc = Start-Process -Wait -PassThru -FilePath "$path" -ArgumentList $myargs
-    if($proc.ExitCode -ne 0) {
-        throw "$($args | Flatten-Array) failed with exit code $($proc.ExitCode)"
+    & "$path" $myargs
+    if($LASTEXITCODE -ne 0) {
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE"
     }
 }
 function exec_out() {
