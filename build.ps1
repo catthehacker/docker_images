@@ -86,7 +86,6 @@ ForEach($platform in $platforms.Split(",")) {
         "--file=./linux/${image}/Dockerfile",
         "--platform=${platform}",
         "--tag=${intermediatetag}",
-        "--format=docker",
         '.'
     )
 
