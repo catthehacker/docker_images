@@ -92,7 +92,10 @@ ForEach($platform in $platforms.Split(",")) {
 
     exec $arguments
     $containerName = New-Guid
-    exec buildah from --format=docker --name "$containerName-container" --platform "${platform}" "$intermediatetag"
+    # buildah bug: https://github.com/containers/buildah/commit/4b7d3555bfa4440c3c5264ae44b93822e10deec0
+    # The arm variant is dropped in the previous step this causes a failure here
+    $plat = $platform.Split("/")
+    exec buildah from --format=docker --name "$containerName-container" --platform "$($plat[0])/$($plat[1])" "$intermediatetag"
     $containerpath = exec_out buildah mount "$containerName-container"
     $envfileContent = Get-Content "$containerpath/etc/environment"
     $arguments = @(
