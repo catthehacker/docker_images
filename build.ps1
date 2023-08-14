@@ -70,6 +70,7 @@ ForEach($platform in $platforms.Split(",")) {
     $arguments = @(
         "buildah",
         "build",
+        "--platform=${platform}",
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
         "--build-arg=TYPE=${type}",
@@ -84,7 +85,6 @@ ForEach($platform in $platforms.Split(",")) {
         "--build-arg=FROM_IMAGE=${from_image}",
         "--build-arg=FROM_TAG=${from_tag}",
         "--file=./linux/${image}/Dockerfile",
-        "--platform=${platform}",
         "--tag=${intermediatetag}",
         "--format=docker",
         '.'

@@ -42,7 +42,7 @@ jobs:
       max-parallel: 4
       matrix:
         PLATFORMS:
-          - linux/amd64,linux/arm64,linux/armhf
+          - linux/amd64,linux/arm64,linux/arm/v7
         TAG:
           - latest
           - 22.04
