@@ -37,21 +37,30 @@ param(
     [switch]$push
 )
 
-$basetags = @()
+function exec() {
+    $path, $myargs = $args
+    $proc=Start-Process -Wait -PassThru -FilePath $path -Args $myargs
+    if($proc.ExitCode -ne 0) {
+    throw "$args failed with exit code $proc.ExitCode"
+    }
+}
+function exec_out() {
+    $path, $myargs = $args
+    $stdout = "$(& "$path" $myargs)"
+    if($LASTEXITCODE -ne 0) {
+    throw "$args failed with exit code $LASTEXITCODE, error: $stdout"
+    }
+    return "$stdout"
+}
 
-$regstryid = $(& (Get-Command 'docker').source run --rm -d -p 8192:5000 registry:2)
+$manifest = "$(New-Guid)-manifest:latest"
+
+exec buildah manifest create "$manifest"
 
 ForEach($platform in $platforms.Split(",")) {
+    $intermediatetag = "$(New-Guid)-intermediate:latest"
+
     $arguments = @(
-        'buildx',
-        'build'
-    )
-
-    $arguments += $progress -ne '' ? @("--progress=$progress") : @("--progress=plain")
-
-    $intermediatetag = "localhost:8192/intermediate:$($platform.Replace("/", "-"))"
-
-    $arguments += @(
         "--tag=${intermediatetag}",
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
@@ -68,54 +77,26 @@ ForEach($platform in $platforms.Split(",")) {
         "--build-arg=FROM_TAG=${from_tag}",
         "--file=./linux/${image}/Dockerfile",
         "--platform=${platform}",
-        "--load",
         '.'
     )
 
-    & (Get-Command 'docker').source $arguments
-
-    # Not using buildx here, because buildx doesn't like a localhost registry
-    $arguments = @(
-        'build'
-    )
-
-    $arguments += $progress -ne '' ? @("--progress=$progress") : @("--progress=plain")
-
-    $imageid = $(& (Get-Command 'docker').source create "${intermediatetag}")
-
-    $envfileContent = $(& (Get-Command 'docker').source cp "${imageid}:/etc/environment" - | tar x --to-stdout)
-
-    & (Get-Command 'docker').source rm "${imageid}"
-
-    echo "FROM ${intermediatetag}" > Dockerfile.tmp
-
-    ForEach($envline in $envfileContent.Split("\n")) {
-        echo "ENV $envline" >> Dockerfile.tmp
+    exec buildah build --format=docker $arguments
+    $containerName = New-Guid
+    exec buildah from --format=docker --name "$containerName-container" --platform "${platform}" "$intermediatetag"
+    $containerpath = exec_out buildah mount "$containerName-container"
+    $envfileContent = Get-Content "$containerpath/etc/environment"
+    $envs = @()
+    ForEach($envline in $envfileContent) {
+        $envs += "--env","$envline"
     }
-
-    $arguments += @(
-        "--tag=${intermediatetag}",
-        "--file=./Dockerfile.tmp",
-        '.'
-    )
-
-    & (Get-Command 'docker').source $arguments
-
-    & (Get-Command 'docker').source push ${intermediatetag}
-
-    $basetags += @("${intermediatetag}")
+    exec buildah config $envs "$containerName-container"
+    exec buildah unmount "$containerName-container"
+    exec buildah commit --format=docker "$containerName-container" "$containerName-image"
+    exec buildah manifest add "$manifest" "$containerName-image"
 }
 
-$arguments = @()
-
-if($push -ne $true) {
-   $arguments += @("--dry-run")
+if($push -eq $true) {
+   ForEach($t in ($tags + ($tag -ne '' ? @("$tag") : @()))) {
+       exec buildah manifest push --all "$manifest" "docker://$t"
+   }
 }
-
-$tags.Count -ne 0 ? ($tags | ForEach-Object { $arguments += @("--tag=$_") }) : ""
-
-$arguments += $tag -ne '' ? @("--tag=$tag") : @()
-
-& (Get-Command 'docker').source buildx imagetools create $arguments $basetags
-
-& (Get-Command 'docker').source stop $regstryid
