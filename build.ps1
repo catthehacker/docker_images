@@ -61,6 +61,9 @@ ForEach($platform in $platforms.Split(",")) {
     $intermediatetag = "$(New-Guid)-intermediate:latest"
 
     $arguments = @(
+        "buildah",
+        "build"
+        "--format=docker",
         "--tag=${intermediatetag}",
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
@@ -80,16 +83,20 @@ ForEach($platform in $platforms.Split(",")) {
         '.'
     )
 
-    exec buildah build --format=docker $arguments
+    exec $arguments
     $containerName = New-Guid
     exec buildah from --format=docker --name "$containerName-container" --platform "${platform}" "$intermediatetag"
     $containerpath = exec_out buildah mount "$containerName-container"
     $envfileContent = Get-Content "$containerpath/etc/environment"
-    $envs = @()
+    $arguments = @(
+        "buildah",
+        "config"
+    )
     ForEach($envline in $envfileContent) {
-        $envs += "--env","$envline"
+        $arguments += "--env","$envline"
     }
-    exec buildah config $envs "$containerName-container"
+    $arguments += @("$containerName-container")
+    exec $arguments 
     exec buildah unmount "$containerName-container"
     exec buildah commit --format=docker "$containerName-container" "$containerName-image"
     exec buildah manifest add "$manifest" "$containerName-image"
