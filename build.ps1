@@ -40,7 +40,7 @@ param(
 # https://stackoverflow.com/a/33545660
 function Flatten-Array{
     $input | ForEach-Object{
-        if ($_ -is [array]){$_ | Flatten-Array}else{$_}
+        if (($_ -is [array]) -and (-not ($_ -is [string])) ){$_ | Flatten-Array}else{$_}
     } | Where-Object{![string]::IsNullorEmpty($_)}
 }
 
@@ -86,6 +86,7 @@ ForEach($platform in $platforms.Split(",")) {
         "--file=./linux/${image}/Dockerfile",
         "--platform=${platform}",
         "--tag=${intermediatetag}",
+        "--format=docker",
         '.'
     )
 
