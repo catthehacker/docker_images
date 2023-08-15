@@ -209,6 +209,13 @@ jobs:
           - dotnet
           - custom
     steps:
+      - name: Cleanup
+        run: |
+          docker rmi -f $(docker images -aq) || :
+          rm -r "$RUNNER_TOOL_CACHE" || :
+          rm -r "$RUNNER_TOOLSDIRECTORY" || :
+          rm -r "$AGENT_TOOLSDIRECTORY" || :
+        shell: bash
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
