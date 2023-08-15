@@ -42,7 +42,7 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   "$GOPATH/bin/go" version
 
   if [[ "${V}" == "$DEFVER" ]]; then
-    ln -s "$GOPATH/bin/*" /usr/bin/
+    ln -s "$GOPATH/bin"/* /usr/bin/
   fi
 done
 
