@@ -46,6 +46,8 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   fi
 done
 
+sed "s|PATH=|PATH=$HOME/bin/go:|g" -i /etc/environment
+
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
 rm -rf /var/cache/* /var/log/* /var/lib/apt/lists/* /tmp/* || echo 'Failed to delete directories'
