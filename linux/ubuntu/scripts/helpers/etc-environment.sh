@@ -25,7 +25,7 @@ function replaceEtcEnvironmentVariable {
     variable_name="$1"
     variable_value="$2"
 
-    # modify /etc/environemnt in place by replacing a string that begins with variable_name
+    # modify /etc/environment in place by replacing a string that begins with variable_name
     # removed quotes for the docker env metadata reader
     sudo sed -i -e "s%^${variable_name}=.*$%${variable_name}=${variable_value}%" /etc/environment
 }
@@ -74,10 +74,10 @@ function appendEtcEnvironmentPath {
 #    /etc/environment
 #
 # TODO: there might be the others variables to be processed in the same way as "PATH" variable
-#       ie MANPATH, INFOPATH, LD_*, etc. In the current implementation the values from /etc/evironments
+#       ie MANPATH, INFOPATH, LD_*, etc. In the current implementation the values from /etc/environment
 #       replace the values of the current environment
 function  reloadEtcEnvironment {
-    # add `export ` to every variable of /etc/environemnt except PATH and eval the result shell script
+    # add `export ` to every variable of /etc/environment except PATH and eval the result shell script
     eval "$(grep -v '^PATH=' /etc/environment | sed -e 's%^%export %')"
     # handle PATH specially
     etc_path=$(getEtcEnvironmentVariable PATH)

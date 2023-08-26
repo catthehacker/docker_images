@@ -16,13 +16,9 @@
 ## Images available
 
 - [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
-
-  - this image is updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]
-
+  - this image is ~~updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]~~ outdated, don't use
     - `ghcr.io/catthehacker/ubuntu:full-latest`
     - `ghcr.io/catthehacker/ubuntu:full-20.04`
-
-    see [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] for more information
 
 - [`/linux/ubuntu/act`](./linux/ubuntu/scripts/act.sh) - image used in [github.com/nektos/act][nektos/act] as medium size image retaining compatibility with most actions while maintaining small size
   - `ghcr.io/catthehacker/ubuntu:act-20.04`
@@ -32,11 +28,14 @@
   - `ghcr.io/catthehacker/ubuntu:runner-20.04`
   - `ghcr.io/catthehacker/ubuntu:runner-22.04`
   - `ghcr.io/catthehacker/ubuntu:runner-latest`
-- [`/linux/ubuntu/js`](./linux/ubuntu/scripts/js.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `js` tools installed (`yarn`, `nvm`, `node` v10/v12, `pnpm`, `grunt`, etc.)
+- [`/linux/ubuntu/js`](./linux/ubuntu/scripts/js.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `js` tools installed (`yarn`, `nvm`, `node` v16/v18, `pnpm`, `grunt`, etc.)
   - `ghcr.io/catthehacker/ubuntu:js-20.04`
   - `ghcr.io/catthehacker/ubuntu:js-22.04`
   - `ghcr.io/catthehacker/ubuntu:js-latest`
 - [`/linux/ubuntu/rust`](./linux/ubuntu/scripts/rust.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `rust` tools installed (`rustfmt`, `clippy`, `cbindgen`, etc.)
+  - `ghcr.io/catthehacker/ubuntu:rust-20.04`
+  - `ghcr.io/catthehacker/ubuntu:rust-22.04`
+  - `ghcr.io/catthehacker/ubuntu:rust-latest`
 - [`/linux/ubuntu/pwsh`](./linux/ubuntu/scripts/pwsh.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `pwsh` tools and modules installed
   - `ghcr.io/catthehacker/ubuntu:pwsh-20.04`
   - `ghcr.io/catthehacker/ubuntu:pwsh-22.04`

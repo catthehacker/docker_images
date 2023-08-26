@@ -37,22 +37,40 @@ param(
     [switch]$push
 )
 
-$basetags = @()
+# https://stackoverflow.com/a/33545660
+function Flatten-Array{
+    $input | ForEach-Object{
+        if (($_ -is [array]) -and (-not ($_ -is [string])) ){$_ | Flatten-Array}else{$_}
+    } | Where-Object{![string]::IsNullorEmpty($_)}
+}
 
-$regstryid = $(& (Get-Command 'docker').source run --rm -d -p 8192:5000 registry:2)
+function exec() {
+    $path, $myargs = $args | Flatten-Array
+    & "$path" $myargs
+    if($LASTEXITCODE -ne 0) {
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE"
+    }
+}
+function exec_out() {
+    $path, $myargs = $args | Flatten-Array
+    $stdout = "$(& "$path" $myargs)"
+    if($LASTEXITCODE -ne 0) {
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE, error: $stdout"
+    }
+    return "$stdout"
+}
+
+$manifest = "$(New-Guid)-manifest:latest"
+
+exec buildah manifest create "$manifest"
 
 ForEach($platform in $platforms.Split(",")) {
+    $intermediatetag = "$(New-Guid)-intermediate:latest"
+
     $arguments = @(
-        'buildx',
-        'build'
-    )
-
-    $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
-
-    $intermediatetag = "localhost:8192/intermediate:$($platform.Replace("/", "-"))"
-
-    $arguments += @(
-        "--tag=${intermediatetag}",
+        "buildah",
+        "build",
+        "--platform=${platform}",
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
         "--build-arg=TYPE=${type}",
@@ -67,55 +85,35 @@ ForEach($platform in $platforms.Split(",")) {
         "--build-arg=FROM_IMAGE=${from_image}",
         "--build-arg=FROM_TAG=${from_tag}",
         "--file=./linux/${image}/Dockerfile",
-        "--platform=${platform}",
-        "--load",
-        '.'
-    )
-
-    & (Get-Command 'docker').source $arguments
-
-    # Not using buildx here, because buildx doesn't like a localhost registry
-    $arguments = @(
-        'build'
-    )
-
-    $arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
-
-    $imageid = $(& (Get-Command 'docker').source create "${intermediatetag}")
-
-    $envfileContent = $(& (Get-Command 'docker').source cp "${imageid}:/etc/environment" - | tar x --to-stdout)
-
-    & (Get-Command 'docker').source rm "${imageid}"
-
-    echo "FROM ${intermediatetag}" > Dockerfile.tmp
-
-    ForEach($envline in $envfileContent.Split("\n")) {
-        echo "ENV $envline" >> Dockerfile.tmp
-    }
-
-    $arguments += @(
         "--tag=${intermediatetag}",
-        "--file=./Dockerfile.tmp",
+        "--format=docker",
         '.'
     )
 
-    & (Get-Command 'docker').source $arguments
-
-    & (Get-Command 'docker').source push ${intermediatetag}
-
-    $basetags += @("${intermediatetag}")
+    exec $arguments
+    $containerName = New-Guid
+    # buildah bug: https://github.com/containers/buildah/commit/4b7d3555bfa4440c3c5264ae44b93822e10deec0
+    # The arm variant is dropped in the previous step this causes a failure here
+    $plat = $platform.Split("/")
+    exec buildah from --format=docker --name "$containerName-container" --platform "$($plat[0])/$($plat[1])" "$intermediatetag"
+    $containerpath = exec_out buildah mount "$containerName-container"
+    $envfileContent = Get-Content "$containerpath/etc/environment"
+    $arguments = @(
+        "buildah",
+        "config"
+    )
+    ForEach($envline in $envfileContent) {
+        $arguments += "--env","$envline"
+    }
+    $arguments += @("$containerName-container")
+    exec $arguments
+    exec buildah unmount "$containerName-container"
+    exec buildah commit --format=docker "$containerName-container" "$containerName-image"
+    exec buildah manifest add "$manifest" "$containerName-image"
 }
 
-$arguments = @()
-
-if($push -ne $true) {
-   $arguments += @("--dry-run")
+if($push -eq $true) {
+   ForEach($t in ($tags + ($tag -ne '' ? @("$tag") : @()))) {
+       exec buildah manifest push --all "$manifest" "docker://$t"
+   }
 }
-
-$tags.Count -ne 0 ? ($tags | ForEach-Object { $arguments += @("--tag=$_") }) : ""
-
-$arguments += $tag -ne '' ? @("--tag=$tag") : @()
-
-& (Get-Command 'docker').source buildx imagetools create $arguments $basetags
-
-& (Get-Command 'docker').source stop $regstryid

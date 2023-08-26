@@ -20,9 +20,12 @@ env:
   IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '16'
+  NODE: '16 18'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
+  PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
+  PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
+  PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
 
 defaults:
   run:
@@ -40,37 +43,30 @@ jobs:
       max-parallel: 4
       matrix:
         PLATFORMS:
-          - linux/amd64,linux/arm64,linux/armhf
+          - linux/amd64,linux/arm64,linux/arm/v7
         TAG:
           - latest
           - 22.04
           - 20.04
     steps:
-      - name: Login to GitHub Container Registry
-        if: ${{ github.repository_owner == github.actor }}
-        id: ghcr
-        uses: docker/login-action@v2
+      - name: Force SLUG to lowercase
+        uses: actions/github-script@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          github-token: n/a
+          script: |
+            core.exportVariable('SLUG', process.env.SLUG.toLowerCase());
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_GHCR
+        run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
       - name: Login to Quay
-        if: ${{ github.repository_owner == github.actor }}
-        id: quay
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
+        if: env.PUSH_QUAY
+        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
-        if: ${{ github.repository_owner == github.actor }}
-        id: dckr
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+        if: env.PUSH_DOCKER_HUB
+        run: exec buildah login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
 
       - name: Print tag
         run: |
@@ -91,20 +87,10 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
-      # setup buildkit ourselves so it doesn't create a new one each time act is executed
-      - run: |
-          docker buildx create \
-            --use \
-            --name image-builder \
-            --buildkitd-flags '--allow-insecure-entitlement network.host' \
-            --driver docker-container \
-            --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
-            --platform "${{ env.PLATFORMS }}"
-
       - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           RUNNER: root
           TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
@@ -117,13 +103,13 @@ jobs:
           ./build.ps1 `
               -push `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           RUNNER: runner
           TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
@@ -136,9 +122,9 @@ jobs:
           ./build.ps1 `
               -push `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
 
       - if: ${{ !env.SKIP_TEST }}
@@ -161,7 +147,7 @@ jobs:
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           TAG: act-${{ matrix.TAG }}
           TYPE: act
@@ -171,16 +157,16 @@ jobs:
           BUILD_TAG: act-${{ matrix.TAG }}
         run: |
           ./build.ps1 `
-              -push `
+              ${{  '-push' || '' }} `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           RUNNER: runner
           TAG: runner-${{ matrix.TAG }}
@@ -193,9 +179,9 @@ jobs:
           ./build.ps1 `
               -push `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
 
   build-flavours:
@@ -239,31 +225,31 @@ jobs:
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
     steps:
-      - name: Login to GitHub Container Registry
-        if: ${{ github.repository_owner == github.actor }}
-        id: ghcr
-        uses: docker/login-action@v2
+      - name: Cleanup
+        run: |
+          docker rmi -f $(docker images -aq) || :
+          rm -r "$RUNNER_TOOL_CACHE" || :
+          rm -r "$RUNNER_TOOLSDIRECTORY" || :
+          rm -r "$AGENT_TOOLSDIRECTORY" || :
+        shell: bash
+      - name: Force SLUG to lowercase
+        uses: actions/github-script@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          github-token: n/a
+          script: |
+            core.exportVariable('SLUG', process.env.SLUG.toLowerCase());
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_GHCR
+        run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
       - name: Login to Quay
-        if: ${{ github.repository_owner == github.actor }}
-        id: quay
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
+        if: env.PUSH_QUAY
+        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
-        if: ${{ github.repository_owner == github.actor }}
-        id: dckr
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+        if: env.PUSH_DOCKER_HUB
+        run: exec buildah login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
 
       - name: Print tag
         run: |
@@ -286,19 +272,10 @@ jobs:
         with:
           platforms: arm64
 
-      - run: |
-          docker buildx create \
-            --use \
-            --name image-builder \
-            --buildkitd-flags '--allow-insecure-entitlement network.host' \
-            --driver docker-container \
-            --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
-            --platform "${{ env.PLATFORMS }}"
-
       - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
@@ -308,13 +285,13 @@ jobs:
           ./build.ps1 `
               -push `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
         env:
           TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
@@ -325,7 +302,7 @@ jobs:
           ./build.ps1 `
               -push `
               -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
+                ${{ env.PUSH_GHCR && format('''ghcr.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_QUAY || env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_QUAY && format('''quay.io/{0}:{1}''{2}', env.SLUG, env.TAG, (env.PUSH_DOCKER_HUB) && ',' || '') || '' }}
+                ${{ env.PUSH_DOCKER_HUB && format('''docker.io/{0}:{1}''{2}', env.SLUG, env.TAG, ('') && ',' || '') || '' }}
               )
