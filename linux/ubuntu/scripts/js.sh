@@ -43,6 +43,7 @@ for V in "${versions[@]}"; do
 done
 
 # npm timeout under qemu with defaults
+set -x
 npm config set fetch-timeout 120000
 npm config set fetch-retry-mintimeout 120000
 npm config set fetch-retry-maxtimeout 120000
@@ -56,7 +57,16 @@ printf "\n\t🐋 Installing JS tools 🐋\t\n"
 npm install -g npm
 npm install -g pnpm
 npm install -g yarn
-npm install -g grunt gulp n parcel-bundler typescript newman vercel webpack webpack-cli lerna
+npm install -g grunt
+npm install -g gulp
+npm install -g n
+npm install -g parcel-bundler
+npm install -g typescript
+npm install -g newman
+npm install -g vercel
+npm install -g webpack
+npm install -g webpack-cli
+npm install -g lerna
 npm install -g --unsafe-perm netlify-cli
 
 printf "\n\t🐋 Installed NPM 🐋\t\n"
