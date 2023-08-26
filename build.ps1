@@ -67,10 +67,13 @@ exec buildah manifest create "$manifest"
 ForEach($platform in $platforms.Split(",")) {
     $intermediatetag = "$(New-Guid)-intermediate:latest"
 
+    $plat = $platform.Split("/")
+
     $arguments = @(
         "buildah",
         "build",
         "--platform=${platform}",
+        "--build-arg=TARGETARCH=$($plat[1])"
         "--build-arg=NODE_VERSION=${node}",
         "--build-arg=DISTRO=${distro}",
         "--build-arg=TYPE=${type}",
@@ -94,7 +97,6 @@ ForEach($platform in $platforms.Split(",")) {
     $containerName = New-Guid
     # buildah bug: https://github.com/containers/buildah/commit/4b7d3555bfa4440c3c5264ae44b93822e10deec0
     # The arm variant is dropped in the previous step this causes a failure here
-    $plat = $platform.Split("/")
     exec buildah from --format=docker --name "$containerName-container" --platform "$($plat[0])/$($plat[1])" "$intermediatetag"
     $containerpath = exec_out buildah mount "$containerName-container"
     $envfileContent = Get-Content "$containerpath/etc/environment"
