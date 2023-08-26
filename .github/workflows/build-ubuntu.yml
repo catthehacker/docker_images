@@ -117,13 +117,13 @@ jobs:
 
           foreach($tagName in $tagNames) {
             if($env:PUSH_GHCR) {
-              $tags += "ghcr.io/$env:SLUG:$tagName"
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_QUAY) {
-              $tags += "quay.io/$env:SLUG:$tagName"
+              $tags += "quay.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_DOCKER_HUB) {
-              $tags += 'docker.io/$env:SLUG:$tagName'
+              $tags += "docker.io/${env:SLUG}:$tagName"
             }
           }
 
@@ -161,13 +161,13 @@ jobs:
 
           foreach($tagName in $tagNames) {
             if($env:PUSH_GHCR) {
-              $tags += "ghcr.io/$env:SLUG:$tagName"
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_QUAY) {
-              $tags += "quay.io/$env:SLUG:$tagName"
+              $tags += "quay.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_DOCKER_HUB) {
-              $tags += 'docker.io/$env:SLUG:$tagName'
+              $tags += "docker.io/${env:SLUG}:$tagName"
             }
           }
 
@@ -309,13 +309,13 @@ jobs:
 
           foreach($tagName in $tagNames) {
             if($env:PUSH_GHCR) {
-              $tags += "ghcr.io/$env:SLUG:$tagName"
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_QUAY) {
-              $tags += "quay.io/$env:SLUG:$tagName"
+              $tags += "quay.io/${env:SLUG}:$tagName"
             }
             if($env:PUSH_DOCKER_HUB) {
-              $tags += "docker.io/$env:SLUG:$tagName"
+              $tags += "docker.io/${env:SLUG}:$tagName"
             }
           }
 
