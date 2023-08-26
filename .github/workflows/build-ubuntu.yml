@@ -315,7 +315,7 @@ jobs:
               $tags += "quay.io/$env:SLUG:$tagName"
             }
             if($env:PUSH_DOCKER_HUB) {
-              $tags += 'docker.io/$env:SLUG:$tagName'
+              $tags += "docker.io/$env:SLUG:$tagName"
             }
           }
 
