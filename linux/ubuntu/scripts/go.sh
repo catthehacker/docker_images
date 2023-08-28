@@ -55,7 +55,7 @@ for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegen
   fi
 done
 
-sed "s|PATH=|PATH=$HOME/bin/go:|g" -i /etc/environment
+sed "s|PATH=|PATH=$HOME/go/bin:|g" -i /etc/environment
 
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
