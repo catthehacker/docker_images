@@ -7,12 +7,14 @@ on:
     paths:
       - '.github/workflows/build-ubuntu.yml'
       - 'linux/ubuntu/**'
+      - 'build.ps1'
     branches:
       - 'master'
   pull_request:
     paths:
       - '.github/workflows/build-ubuntu.yml'
       - 'linux/ubuntu/**'
+      - 'build.ps1'
   workflow_dispatch:
 
 env:
