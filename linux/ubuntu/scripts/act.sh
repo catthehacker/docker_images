@@ -68,6 +68,8 @@ apt-get install -y git
 
 git --version
 
+git config --system --add safe.directory '*'
+
 wget https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh -qO- | bash
 apt-get update
 apt-get install -y git-lfs
