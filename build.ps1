@@ -72,6 +72,7 @@ ForEach($platform in $platforms.Split(",")) {
     $arguments = @(
         "buildah",
         "build",
+        "--ulimit=nofile=4096:4096",
         "--platform=${platform}",
         "--build-arg=TARGETARCH=$($plat[1])"
         "--build-arg=NODE_VERSION=${node}",
