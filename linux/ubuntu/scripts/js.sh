@@ -49,6 +49,8 @@ npm config set fetch-retry-mintimeout 120000
 npm config set fetch-retry-maxtimeout 120000
 npm config set prefer-offline true
 npm config set registry http://registry.npmjs.org/
+npm config set maxsockets 4
+npm config set fetch-retries 4
 # Otherwise there are no log updates for 10m+ on qemu
 npm config set loglevel verbose
 npm config ls -l
