@@ -26,11 +26,11 @@ jobs:
       max-parallel: 1
       matrix:
         copy:
-        - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-usr-local-opt-snap-${{ input.version }}
+        - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-usr-local-opt-snap-${{ inputs.version }}
           dest: full-latest
-        - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-usr-local-opt-snap-${{ input.version }}
+        - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-usr-local-opt-snap-${{ inputs.version }}
           dest: full-22.04
-        - src: ghcr.io/christopherhx/runner-images:ubuntu20-runner-usr-local-opt-snap-${{ input.version }}
+        - src: ghcr.io/christopherhx/runner-images:ubuntu20-runner-usr-local-opt-snap-${{ inputs.version }}
           dest: full-20.04
     steps:
       - name: Force SLUG to lowercase
