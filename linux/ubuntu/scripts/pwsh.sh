@@ -32,8 +32,16 @@ rm /tmp/powershell.tar.gz
 printf "\n\t🐋 Installed PWSH 🐋\t\n"
 pwsh -v
 
+case "$(uname -m)" in
+  'aarch64')
+    printf "\n\t🐋 Skip Installing PowerShell modules, due to crash maybe caused by qemu 🐋\t\n"
+    exit 0
+    ;;
+  *)
+    modules=("MarkdownPS" "Pester" "PSScriptAnalyzer")
+    ;;
+esac
 printf "\n\t🐋 Installing PowerShell modules 🐋\t\n"
-modules=("MarkdownPS" "Pester" "PSScriptAnalyzer")
 
 pwsh -nol -nop -c "Set-PSRepository -Name PSGallery -InstallationPolicy Trusted"
 

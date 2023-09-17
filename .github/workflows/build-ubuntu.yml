@@ -7,12 +7,14 @@ on:
     paths:
       - '.github/workflows/build-ubuntu.yml'
       - 'linux/ubuntu/**'
+      - 'build.ps1'
     branches:
       - 'master'
   pull_request:
     paths:
       - '.github/workflows/build-ubuntu.yml'
       - 'linux/ubuntu/**'
+      - 'build.ps1'
   workflow_dispatch:
 
 env:
@@ -20,9 +22,13 @@ env:
   IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '12 16'
+  NODE: '16 18'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
+  PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
+  PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
+  PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
+  LATEST_TAG: 22.04
 
 defaults:
   run:
@@ -31,6 +37,7 @@ defaults:
 jobs:
   build-base:
     name: Build base ${{ matrix.TAG }}
+    if: "!contains(github.event.pull_request.body, '[skip build-base]')"
     runs-on: ubuntu-latest
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
@@ -39,37 +46,29 @@ jobs:
       max-parallel: 4
       matrix:
         PLATFORMS:
-          - linux/amd64,linux/arm64,linux/armhf
+          - linux/amd64,linux/arm64,linux/arm/v7
         TAG:
-          - latest
+          - 22.04
           - 20.04
-          - 18.04
     steps:
-      - name: Login to GitHub Container Registry
-        if: ${{ github.repository_owner == github.actor }}
-        id: ghcr
-        uses: docker/login-action@v1
+      - name: Force SLUG to lowercase
+        uses: actions/github-script@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          github-token: n/a
+          script: |
+            core.exportVariable('SLUG', process.env.SLUG.toLowerCase());
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_GHCR
+        run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
       - name: Login to Quay
-        if: ${{ github.repository_owner == github.actor }}
-        id: quay
-        uses: docker/login-action@v1
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
+        if: env.PUSH_QUAY
+        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
-        if: ${{ github.repository_owner == github.actor }}
-        id: dckr
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+        if: env.PUSH_DOCKER_HUB
+        run: exec buildah login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
 
       - name: Print tag
         run: |
@@ -81,67 +80,107 @@ jobs:
 
       - name: Set Ubuntu version to RELEASE
         run: |
-          if [ "latest" = "${{ matrix.TAG }}" ]; then
+          if [ "$LATEST_TAG" = "${{ matrix.TAG }}" ]; then
             echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
           else
             echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      # setup buildkit ourselves so it doesn't create a new one each time act is executed
-      - run: |
-          docker buildx create \
-            --use \
-            --name image-builder \
-            --buildkitd-flags '--allow-insecure-entitlement network.host' \
-            --driver docker-container \
-            --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
-            --platform "${{ env.PLATFORMS }}"
+        uses: docker/setup-qemu-action@v2
 
       - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           RUNNER: root
-          TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          TAG: act-${{ matrix.TAG }}
+          LATEST_TAG: act-latest
           TYPE: act
           FROM_IMAGE: buildpack-deps
           FROM_TAG: ${{ env.RELEASE_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: act-${{ matrix.TAG }}
+          PUSH_LATEST: ${{ env.LATEST_TAG == matrix.TAG && '1' || '' }}
+          PUSH_DEFAULT: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) && '1' || '' }}
         run: |
+          $tags = @()
+          $tagNames = @( "$env:TAG-$env:PART_TAG" )
+          if($env:PUSH_LATEST) {
+            $tagNames += "$env:LATEST_TAG-$env:PART_TAG"
+          }
+          if($env:PUSH_DEFAULT) {
+            $tagNames += $env:TAG
+            if($env:PUSH_LATEST) {
+              $tagNames += $env:LATEST_TAG
+            }
+          }
+
+          foreach($tagName in $tagNames) {
+            if($env:PUSH_GHCR) {
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_QUAY) {
+              $tags += "quay.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_DOCKER_HUB) {
+              $tags += "docker.io/${env:SLUG}:$tagName"
+            }
+          }
+
+          echo $tags
+          
           ./build.ps1 `
               -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+              -tags $tags
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
           RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          TAG: runner-${{ matrix.TAG }}
+          LATEST_TAG: runner-latest
           TYPE: runner
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
           BUILD_TAG: runner-${{ matrix.TAG }}
+          PUSH_LATEST: ${{ env.LATEST_TAG == matrix.TAG && '1' || '' }}
+          PUSH_DEFAULT: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) && '1' || '' }}
         run: |
+          $tags = @()
+          $tagNames = @( "$env:TAG-$env:PART_TAG" )
+          if($env:PUSH_LATEST) {
+            $tagNames += "$env:LATEST_TAG-$env:PART_TAG"
+          }
+          if($env:PUSH_DEFAULT) {
+            $tagNames += $env:TAG
+            if($env:PUSH_LATEST) {
+              $tagNames += $env:LATEST_TAG
+            }
+          }
+
+          foreach($tagName in $tagNames) {
+            if($env:PUSH_GHCR) {
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_QUAY) {
+              $tags += "quay.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_DOCKER_HUB) {
+              $tags += "docker.io/${env:SLUG}:$tagName"
+            }
+          }
+
+          echo $tags
+          
           ./build.ps1 `
               -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+              -tags $tags
 
       - if: ${{ !env.SKIP_TEST }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: '^1.16'
 
@@ -158,47 +197,9 @@ jobs:
           cd act/
           go test ./...
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
-        env:
-          TAG: act-${{ matrix.TAG }}
-          TYPE: act
-          FROM_IMAGE: buildpack-deps
-          FROM_TAG: ${{ env.RELEASE_TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: act-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
-
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        shell: pwsh
-        env:
-          RUNNER: runner
-          TAG: runner-${{ matrix.TAG }}
-          TYPE: runner
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-          BUILD_TAG: runner-${{ matrix.TAG }}
-        run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
-
   build-flavours:
     name: Build ${{ matrix.TYPE }}:${{ matrix.TAG }}
+    if: (!cancelled() && !failure())
     runs-on: ubuntu-latest
     needs: [build-base]
     env:
@@ -210,43 +211,57 @@ jobs:
       max-parallel: 8
       matrix:
         TAG:
-          - latest
+          - 22.04
           - 20.04
-          - 18.04
-        PLATFORMS:
-          - 'linux/amd64'
         TYPE:
           - go
           - js
           - pwsh
           - rust
+          - dotnet
+          - java-tools
           - custom
+        include:
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: go
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: js
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: pwsh
+          - PLATFORMS: linux/amd64
+            TYPE: rust
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: dotnet
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: java-tools
+          - PLATFORMS: linux/amd64,linux/arm64
+            TYPE: custom
     steps:
-      - name: Login to GitHub Container Registry
-        if: ${{ github.repository_owner == github.actor }}
-        id: ghcr
-        uses: docker/login-action@v1
+      - name: Cleanup
+        run: |
+          docker rmi -f $(docker images -aq) || :
+          rm -r "$RUNNER_TOOL_CACHE" || :
+          rm -r "$RUNNER_TOOLSDIRECTORY" || :
+          rm -r "$AGENT_TOOLSDIRECTORY" || :
+        shell: bash
+      - name: Force SLUG to lowercase
+        uses: actions/github-script@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          github-token: n/a
+          script: |
+            core.exportVariable('SLUG', process.env.SLUG.toLowerCase());
+
+      - name: Login to GitHub Container Registry
+        if: env.PUSH_GHCR
+        run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
       - name: Login to Quay
-        if: ${{ github.repository_owner == github.actor }}
-        id: quay
-        uses: docker/login-action@v1
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USER }}
-          password: ${{ secrets.QUAY_TOKEN }}
+        if: env.PUSH_QUAY
+        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
-        if: ${{ github.repository_owner == github.actor }}
-        id: dckr
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+        if: env.PUSH_DOCKER_HUB
+        run: exec buildah login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
 
       - name: Print tag
         run: |
@@ -258,55 +273,56 @@ jobs:
 
       - name: Set Ubuntu version to RELEASE
         run: |
-          if [ "latest" = "${{ matrix.TAG }}" ]; then
+          if [ "$LATEST_TAG" = "${{ matrix.TAG }}" ]; then
             echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
           else
             echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
           fi
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - run: |
-          docker buildx create \
-            --use \
-            --name image-builder \
-            --buildkitd-flags '--allow-insecure-entitlement network.host' \
-            --driver docker-container \
-            --driver-opt "env.BUILDKIT_STEP_LOG_MAX_SIZE=50000000" \
-            --platform "${{ env.PLATFORMS }}"
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
 
       - uses: actions/checkout@v3
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
+        shell: buildah unshare pwsh "{0}"
         env:
-          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
+          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}
+          LATEST_TAG: ${{ matrix.TYPE }}-latest
           FROM_IMAGE: ghcr.io/${{ env.SLUG }}
           FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
           BUILD_TAG_VERSION: ${{ env.PART_TAG }}
+          PUSH_LATEST: ${{ env.LATEST_TAG == matrix.TAG && '1' || '' }}
+          PUSH_DEFAULT: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) && '1' || '' }}
         run: |
-          ./build.ps1 `
-              -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+          $tags = @()
+          $tagNames = @( "$env:TAG-$env:PART_TAG" )
+          if($env:PUSH_LATEST) {
+            $tagNames += "$env:LATEST_TAG-$env:PART_TAG"
+          }
+          if($env:PUSH_DEFAULT) {
+            $tagNames += $env:TAG
+            if($env:PUSH_LATEST) {
+              $tagNames += $env:LATEST_TAG
+            }
+          }
 
-      - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
-        shell: pwsh
-        if: ${{ ( github.event_name != 'pull_request' && github.event_name != 'push' && !env.ACT ) }}
-        env:
-          TAG: ${{ matrix.TYPE }}-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          FROM_IMAGE: ghcr.io/${{ env.SLUG }}
-          FROM_TAG: act-${{ matrix.TAG }}-${{ env.PART_TAG }}
-          BUILD_TAG_VERSION: ${{ env.PART_TAG }}
-        run: |
+          foreach($tagName in $tagNames) {
+            if($env:PUSH_GHCR) {
+              $tags += "ghcr.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_QUAY) {
+              $tags += "quay.io/${env:SLUG}:$tagName"
+            }
+            if($env:PUSH_DOCKER_HUB) {
+              $tags += "docker.io/${env:SLUG}:$tagName"
+            }
+          }
+
+          echo $tags
+          
           ./build.ps1 `
               -push `
-              -tags @(
-                'ghcr.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'quay.io/${{ env.SLUG }}:${{ env.TAG }}',
-                'docker.io/${{ env.SLUG }}:${{ env.TAG }}'
-              )
+              -tags $tags

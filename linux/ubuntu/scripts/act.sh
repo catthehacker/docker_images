@@ -68,6 +68,8 @@ apt-get install -y git
 
 git --version
 
+git config --system --add safe.directory '*'
+
 wget https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh -qO- | bash
 apt-get update
 apt-get install -y git-lfs
@@ -75,18 +77,12 @@ apt-get install -y git-lfs
 LSB_OS_VERSION="${VERSION_ID//\./}"
 echo "LSB_OS_VERSION=${LSB_OS_VERSION}" | tee -a "/etc/environment"
 
-wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json"
+wget -qO "/imagegeneration/toolset.json" "https://raw.githubusercontent.com/actions/virtual-environments/main/images/linux/toolsets/toolset-${LSB_OS_VERSION}.json" || echo "File not available"
 wget -qO "/imagegeneration/LICENSE" "https://raw.githubusercontent.com/actions/virtual-environments/main/LICENSE"
 
 if [ "$(uname -m)" = x86_64 ]; then
   wget -qO "/usr/bin/jq" "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
   chmod +x "/usr/bin/jq"
-fi
-
-if [[ "${VERSION_ID}" == "16.04" ]]; then
-  printf 'git-lfs not available for Xenial'
-else
-  apt-get -yq install --no-install-recommends --no-install-suggests git-lfs
 fi
 
 printf "\n\t🐋 Updated apt lists and upgraded packages 🐋\t\n"
@@ -124,8 +120,10 @@ for ver in "${NODE[@]}"; do
   VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
   NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$(node_arch)"
   mkdir -v -m 0777 -p "$NODEPATH"
-  curl -SsL "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" | tar -Jxf - --strip-components=1 -C "$NODEPATH"
-  if [[ "${ver}" == "16" ]]; then
+  wget "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" -O "node-$VER-linux-$(node_arch).tar.xz"
+  tar -Jxf "node-$VER-linux-$(node_arch).tar.xz" --strip-components=1 -C "$NODEPATH"
+  rm "node-$VER-linux-$(node_arch).tar.xz"
+  if [[ "${ver}" == "18" ]]; then  # make this version the default (latest LTS)
     sed "s|^PATH=|PATH=$NODEPATH/bin:|mg" -i /etc/environment
   fi
   export PATH="$NODEPATH/bin:$PATH"
