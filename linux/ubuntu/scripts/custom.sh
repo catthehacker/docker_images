@@ -36,6 +36,7 @@ case "$(uname -m)" in
   'aarch64')
     scripts=(
       basic
+      gh
       pwsh
       go
       js
@@ -45,6 +46,7 @@ case "$(uname -m)" in
   'x86_64') 
     scripts=(
       basic
+      gh
       pwsh
       go
       js

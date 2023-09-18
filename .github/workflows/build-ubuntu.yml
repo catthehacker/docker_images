@@ -220,6 +220,7 @@ jobs:
           - rust
           - dotnet
           - java-tools
+          - gh
           - custom
         include:
           - PLATFORMS: linux/amd64,linux/arm64
@@ -234,6 +235,8 @@ jobs:
             TYPE: dotnet
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: java-tools
+          - PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
+            TYPE: gh
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
     steps:
@@ -281,8 +284,6 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
-        with:
-          platforms: arm64
 
       - uses: actions/checkout@v3
 
