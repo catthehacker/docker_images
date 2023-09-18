@@ -37,36 +37,86 @@ param(
     [switch]$push
 )
 
-$arguments = @(
-    'buildx',
-    'build'
-)
+# https://stackoverflow.com/a/33545660
+function Flatten-Array{
+    $input | ForEach-Object{
+        if (($_ -is [array]) -and (-not ($_ -is [string])) ){$_ | Flatten-Array}else{$_}
+    } | Where-Object{![string]::IsNullorEmpty($_)}
+}
 
-$arguments += $push -eq $True ? @("--push") : @()
+function exec() {
+    $path, $myargs = $args | Flatten-Array
+    & "$path" $myargs
+    if($LASTEXITCODE -ne 0) {
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE"
+    }
+}
+function exec_out() {
+    $path, $myargs = $args | Flatten-Array
+    $stdout = "$(& "$path" $myargs)"
+    if($LASTEXITCODE -ne 0) {
+        throw "$($args | Flatten-Array) failed with exit code $LASTEXITCODE, error: $stdout"
+    }
+    return "$stdout"
+}
 
-$arguments += $progress -ne 'plain' ? @("--progress=$progress") : @("--progress=plain")
+$manifest = "$(New-Guid)-manifest:latest"
 
-$tags.Count -ne 0 ? ($tags | ForEach-Object { $arguments += @("--tag=$_") }) : ""
+exec buildah manifest create "$manifest"
 
-$arguments += $tag -ne '' ? @("--tag=$tag") : @()
+ForEach($platform in $platforms.Split(",")) {
+    $intermediatetag = "$(New-Guid)-intermediate:latest"
 
-$arguments += @(
-    "--build-arg=NODE_VERSION=${node}",
-    "--build-arg=DISTRO=${distro}",
-    "--build-arg=TYPE=${type}",
-    "--build-arg=RUNNER=${runner}",
-    "--build-arg=BUILD_DATE=$((Get-Date).ToString('u'))",
-    "--build-arg=BUILD_OWNER=${owner}",
-    "--build-arg=BUILD_OWNER_MAIL=${owner}",
-    "--build-arg=BUILD_REPO=${repository}",
-    "--build-arg=BUILD_TAG=${build_tag}",
-    "--build-arg=BUILD_TAG_VERSION=${build_tag_version}",
-    "--build-arg=BUILD_REF=${build_ref}",
-    "--build-arg=FROM_IMAGE=${from_image}",
-    "--build-arg=FROM_TAG=${from_tag}",
-    "--file=./linux/${image}/Dockerfile",
-    "--platform=${platforms}",
-    '.'
-)
+    $plat = $platform.Split("/")
 
-& (Get-Command 'docker').source $arguments
+    $arguments = @(
+        "buildah",
+        "build",
+        "--ulimit=nofile=4096:4096",
+        "--platform=${platform}",
+        "--build-arg=TARGETARCH=$($plat[1])"
+        "--build-arg=NODE_VERSION=${node}",
+        "--build-arg=DISTRO=${distro}",
+        "--build-arg=TYPE=${type}",
+        "--build-arg=RUNNER=${runner}",
+        "--build-arg=BUILD_DATE=$((Get-Date).ToString('u'))",
+        "--build-arg=BUILD_OWNER=${owner}",
+        "--build-arg=BUILD_OWNER_MAIL=${owner}",
+        "--build-arg=BUILD_REPO=${repository}",
+        "--build-arg=BUILD_TAG=${build_tag}",
+        "--build-arg=BUILD_TAG_VERSION=${build_tag_version}",
+        "--build-arg=BUILD_REF=${build_ref}",
+        "--build-arg=FROM_IMAGE=${from_image}",
+        "--build-arg=FROM_TAG=${from_tag}",
+        "--file=./linux/${image}/Dockerfile",
+        "--tag=${intermediatetag}",
+        "--format=docker",
+        '.'
+    )
+
+    exec $arguments
+    $containerName = New-Guid
+    # buildah bug: https://github.com/containers/buildah/commit/4b7d3555bfa4440c3c5264ae44b93822e10deec0
+    # The arm variant is dropped in the previous step this causes a failure here
+    exec buildah from --format=docker --name "$containerName-container" --platform "$($plat[0])/$($plat[1])" "$intermediatetag"
+    $containerpath = exec_out buildah mount "$containerName-container"
+    $envfileContent = Get-Content "$containerpath/etc/environment"
+    $arguments = @(
+        "buildah",
+        "config"
+    )
+    ForEach($envline in $envfileContent) {
+        $arguments += "--env","$envline"
+    }
+    $arguments += @("$containerName-container")
+    exec $arguments
+    exec buildah unmount "$containerName-container"
+    exec buildah commit --format=docker "$containerName-container" "$containerName-image"
+    exec buildah manifest add "$manifest" "$containerName-image"
+}
+
+if($push -eq $true) {
+   ForEach($t in ($tags + ($tag -ne '' ? @("$tag") : @()))) {
+       exec buildah manifest push --all "$manifest" "docker://$t"
+   }
+}

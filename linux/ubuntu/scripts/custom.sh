@@ -32,14 +32,31 @@ bash -c "$(curl -sL https://raw.githubusercontent.com/ilikenwf/apt-fast/master/q
 #   echo '* hard stack 16384'
 # } >>/etc/security/limits.conf
 
-scripts=(
-  basic
-  pwsh
-  go
-  js
-  rust
-  vcpkg
-)
+case "$(uname -m)" in
+  'aarch64')
+    scripts=(
+      basic
+      gh
+      pwsh
+      go
+      js
+      dotnet
+    )
+    ;;
+  'x86_64') 
+    scripts=(
+      basic
+      gh
+      pwsh
+      go
+      js
+      rust
+      vcpkg
+      dotnet
+    )
+    ;;
+  *) exit 1 ;;
+esac
 
 for SCRIPT in "${scripts[@]}"; do
   printf "\n\t🧨 Executing %s.sh 🧨\t\n" "${SCRIPT}"
