@@ -93,8 +93,8 @@ printf "\n\t🐋 Updated apt lists and upgraded packages 🐋\t\n"
 printf "\n\t🐋 Creating ~/.ssh and adding 'github.com' 🐋\t\n"
 mkdir -m 0700 -p ~/.ssh
 {
-  ssh-keyscan -t rsa github.com
-  ssh-keyscan -t rsa ssh.dev.azure.com
+  ssh-keyscan github.com
+  ssh-keyscan ssh.dev.azure.com
 } >>/etc/ssh/ssh_known_hosts
 
 printf "\n\t🐋 Installed base utils 🐋\t\n"
