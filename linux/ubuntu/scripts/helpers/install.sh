@@ -66,7 +66,7 @@ verlte() {
 }
 
 get_toolset_path() {
-    echo "/imagegeneration/installers/toolset.json"
+    echo "/imagegeneration/toolset.json"
 }
 
 get_toolset_value() {
