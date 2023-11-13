@@ -149,6 +149,11 @@ case "$(uname -m)" in
       yq
     )
     ;;
+  'armv7l')
+    scripts=(
+      yq
+    )
+    ;;
   *) exit 1 ;;
 esac
 
