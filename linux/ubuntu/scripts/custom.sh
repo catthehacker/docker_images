@@ -41,7 +41,6 @@ case "$(uname -m)" in
       go
       js
       dotnet
-      yq
     )
     ;;
   'x86_64')
@@ -54,7 +53,6 @@ case "$(uname -m)" in
       rust
       vcpkg
       dotnet
-      yq
     )
     ;;
   *) exit 1 ;;
