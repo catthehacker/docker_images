@@ -138,6 +138,30 @@ for ver in "${NODE[@]}"; do
   "${NODEPATH}"/bin/npm -v
 done
 
+case "$(uname -m)" in
+  'aarch64')
+    scripts=(
+      yq
+    )
+    ;;
+  'x86_64')
+    scripts=(
+      yq
+    )
+    ;;
+  'armv7l')
+    scripts=(
+      yq
+    )
+    ;;
+  *) exit 1 ;;
+esac
+
+for SCRIPT in "${scripts[@]}"; do
+  printf "\n\t🧨 Executing %s.sh 🧨\t\n" "${SCRIPT}"
+  "/imagegeneration/installers/${SCRIPT}.sh"
+done
+
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
 rm -rf /var/cache/* /var/log/* /var/lib/apt/lists/* /tmp/* || echo 'Failed to delete directories'

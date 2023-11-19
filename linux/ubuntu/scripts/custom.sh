@@ -43,7 +43,7 @@ case "$(uname -m)" in
       dotnet
     )
     ;;
-  'x86_64') 
+  'x86_64')
     scripts=(
       basic
       gh
