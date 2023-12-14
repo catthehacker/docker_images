@@ -229,7 +229,7 @@ jobs:
             TYPE: js
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: pwsh
-          - PLATFORMS: linux/amd64
+          - PLATFORMS: linux/amd64,linux/arm64
             TYPE: rust
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: dotnet
