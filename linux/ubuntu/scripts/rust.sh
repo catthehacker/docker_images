@@ -20,7 +20,11 @@ source "${CARGO_HOME}/env"
 
 rustup component add rustfmt clippy
 
-cargo install --locked bindgen-cli cbindgen cargo-audit cargo-outdated
+printf "\n\t🐋 Installing cargo-binstall 🐋\t\n"
+# Pinned to commit-hash for latest release v1.4.7 to prevent accidental problems
+curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/f6a95fa733be466c0e66c360f52e1d6998e47f25/install-from-binstall-release.sh | bash
+
+cargo binstall -y bindgen-cli cbindgen cargo-audit cargo-outdated
 
 chmod -R 777 "$(dirname "${RUSTUP_HOME}")"
 
