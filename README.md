@@ -15,10 +15,15 @@
 
 ## Images available
 
-- [catthehacker/virtual-environments-fork][catthehacker/virtual-environments-fork] - GitHub Actions runner image containing all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
-  - this image is ~~updated manually due to amount of changes in [actions/virtual-environments][actions/virtual-environments]~~ outdated, don't use
+- [ChristopherHX/runner-image-blobs](https://github.com/ChristopherHX/runner-image-blobs) GitHub Actions Hosted runner image copy containing allmost all possible tools (image is extremely big, 20GB compressed, ~60GB extracted)
+  - A tar backup of the GitHub Hosted Runners are uploaded once a week via a custom docker image upload script in runner-image-blobs repository
+  - Synced by cron job `.github/workflows/copy-full-image.yml` to the following tags
+  - You can verify if the Image is still updated regulary by inspecting the dates in `docker buildx imagetools inspect catthehacker/ubuntu:full-latest --format "{{ json . }}"`
+    - The friendly tag name version in the output can be looked up here https://github.com/actions/runner-images/releases to find out more about the sources
+  - available tags are
     - `ghcr.io/catthehacker/ubuntu:full-latest`
-    - `ghcr.io/catthehacker/ubuntu:full-20.04`
+    - `ghcr.io/catthehacker/ubuntu:full-22.04`
+    - `ghcr.io/catthehacker/ubuntu:full-20.04` (Updated as long ubuntu-20.04 free public GitHub Hosted Runners are available)
 
 - [`/linux/ubuntu/act`](./linux/ubuntu/scripts/act.sh) - image used in [github.com/nektos/act][nektos/act] as medium size image retaining compatibility with most actions while maintaining small size
   - `ghcr.io/catthehacker/ubuntu:act-20.04`
