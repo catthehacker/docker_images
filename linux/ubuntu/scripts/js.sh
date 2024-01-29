@@ -27,7 +27,7 @@ JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-o
 for V in "${versions[@]}"; do
   printf "\n\t🐋 Installing NODE=%s 🐋\t\n" "${V}"
   VER=$(echo "${JSON}" | jq "[.[] | select(.version|test(\"^v${V}\"))][0].version" -r)
-  NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/x64"
+  NODEPATH="${ACT_TOOLSDIRECTORY}/node/${VER:1}/x64"
 
   mkdir -v -m 0777 -p "$NODEPATH"
   ARCH=$(uname -m)

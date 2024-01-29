@@ -101,7 +101,7 @@ installOpenJDK() {
         exit 1
     fi
 
-    JAVA_TOOLCACHE_PATH="${AGENT_TOOLSDIRECTORY}/Java_${VENDOR_NAME}_jdk"
+    JAVA_TOOLCACHE_PATH="${ACT_TOOLSDIRECTORY}/Java_${VENDOR_NAME}_jdk"
 
     fullJavaVersion=$(cat "${javaVersionPath}/release" | grep "^SEMANTIC" | cut -d "=" -f 2 | tr -d "\"" | tr "+" "-")
 
