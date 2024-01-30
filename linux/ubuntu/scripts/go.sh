@@ -29,7 +29,7 @@ DEFVER=$(jq -r '.toolcache[] | select(.name == "go") | .default' "/imagegenerati
 for V in $(jq -r '.toolcache[] | select(.name == "go") | .versions[]' "/imagegeneration/toolset.json"); do
   printf "\n\t🐋 Installing GO=%s 🐋\t\n" "${V}"
   VER=$(jq -r "[.[] | select(.version|test(\"^${V}\"))][0].version" "/tmp/go-toolset.json")
-  GOPATH="$AGENT_TOOLSDIRECTORY/go/${VER}/$(toolcache_arch)"
+  GOPATH="${ACT_TOOLSDIRECTORY}/go/${VER}/$(toolcache_arch)"
 
   mkdir -v -m 0777 -p "$GOPATH"
   DL_VER="${VER}"

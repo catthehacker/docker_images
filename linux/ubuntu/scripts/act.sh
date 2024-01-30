@@ -21,6 +21,7 @@ node_arch() {
 
 ImageOS=ubuntu$(echo "${VERSION_ID}" | cut -d'.' -f 1)
 AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
+ACT_TOOLSDIRECTORY=/opt/acttoolcache
 {
   echo "IMAGE_OS=$ImageOS"
   echo "ImageOS=$ImageOS"
@@ -30,10 +31,13 @@ AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
   echo "DEPLOYMENT_BASEPATH=/opt/runner"
   echo "USER=$(whoami)"
   echo "RUNNER_USER=$(whoami)"
+  echo "ACT_TOOLSDIRECTORY=${ACT_TOOLSDIRECTORY}"
 } | tee -a "/etc/environment"
 
 mkdir -m 0777 -p "${AGENT_TOOLSDIRECTORY}"
 chown -R 1001:1000 "${AGENT_TOOLSDIRECTORY}"
+mkdir -m 0777 -p "${ACT_TOOLSDIRECTORY}"
+chown -R 1001:1000 "${ACT_TOOLSDIRECTORY}"
 
 mkdir -m 0777 -p /github
 chown -R 1001:1000 /github
@@ -121,7 +125,7 @@ IFS=' ' read -r -a NODE <<<"$NODE_VERSION"
 for ver in "${NODE[@]}"; do
   printf "\n\t🐋 Installing Node.JS=%s 🐋\t\n" "${ver}"
   VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
-  NODEPATH="$AGENT_TOOLSDIRECTORY/node/${VER:1}/$(node_arch)"
+  NODEPATH="${ACT_TOOLSDIRECTORY}/node/${VER:1}/$(node_arch)"
   mkdir -v -m 0777 -p "$NODEPATH"
   wget "https://nodejs.org/download/release/latest-v${ver}.x/node-$VER-linux-$(node_arch).tar.xz" -O "node-$VER-linux-$(node_arch).tar.xz"
   tar -Jxf "node-$VER-linux-$(node_arch).tar.xz" --strip-components=1 -C "$NODEPATH"
