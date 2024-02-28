@@ -51,6 +51,19 @@ jobs:
           - 22.04
           - 20.04
     steps:
+      - name: Setup buildah
+        run: |
+          sudo apt-get -y -qq update
+          sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
+          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          make -C buildah buildah
+          sudo mkdir -p /usr/local/bin/
+          sudo cp -R "$PWD/buildah/bin/*" /usr/local/bin/
+          sudo apt install protobuf-compiler
+          git clone https://github.com/containers/netavark
+          make -C netavark/
+          sudo mkdir -p /usr/local/libexec/podman/
+          sudo cp -R "$PWD/netavark/bin/*" /usr/local/libexec/podman/
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -240,6 +253,20 @@ jobs:
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
     steps:
+      - name: Setup buildah
+        run: |
+          sudo apt-get -y -qq update
+          sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
+          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          make -C buildah buildah
+          sudo mkdir -p /usr/local/bin/
+          sudo cp -R "$PWD/buildah/bin/*" /usr/local/bin/
+          sudo apt install protobuf-compiler
+          git clone https://github.com/containers/netavark
+          make -C netavark/
+          sudo mkdir -p /usr/local/libexec/podman/
+          sudo cp -R "$PWD/netavark/bin/*" /usr/local/libexec/podman/
+
       - name: Cleanup
         run: |
           docker rmi -f $(docker images -aq) || :
