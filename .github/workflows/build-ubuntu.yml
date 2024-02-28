@@ -51,6 +51,9 @@ jobs:
           - 22.04
           - 20.04
     steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21.0'
       - name: Setup buildah
         run: |
           sudo apt-get -y -qq update
@@ -253,6 +256,9 @@ jobs:
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
     steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21.0'
       - name: Setup buildah
         run: |
           sudo apt-get -y -qq update
