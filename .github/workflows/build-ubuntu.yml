@@ -61,12 +61,12 @@ jobs:
           git clone https://github.com/ChristopherHX/containers-buildah buildah
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
-          sudo cp -R "$PWD/buildah/bin/*" /usr/local/bin/
+          sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
           sudo apt install protobuf-compiler
           git clone https://github.com/containers/netavark
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
-          sudo cp -R "$PWD/netavark/bin/*" /usr/local/libexec/podman/
+          sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -266,12 +266,12 @@ jobs:
           git clone https://github.com/ChristopherHX/containers-buildah buildah
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
-          sudo cp -R "$PWD/buildah/bin/*" /usr/local/bin/
+          sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
           sudo apt install protobuf-compiler
           git clone https://github.com/containers/netavark
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
-          sudo cp -R "$PWD/netavark/bin/*" /usr/local/libexec/podman/
+          sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
 
       - name: Cleanup
         run: |
