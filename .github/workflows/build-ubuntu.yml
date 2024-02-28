@@ -51,6 +51,26 @@ jobs:
           - 22.04
           - 20.04
     steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21.0'
+      - name: Setup buildah
+        run: |
+          sudo apt-get -y -qq update
+          sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
+          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          make -C buildah buildah
+          sudo mkdir -p /usr/local/bin/
+          sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
+          sudo apt install protobuf-compiler
+          git clone https://github.com/containers/netavark
+          make -C netavark/
+          sudo mkdir -p /usr/local/libexec/podman/
+          sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
+          curl -L https://github.com/containers/crun/releases/download/1.14.3/crun-1.14.3-linux-amd64 --output crun
+          chmod +x crun
+          sudo cp crun /usr/local/bin/crun
+          echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -240,6 +260,26 @@ jobs:
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
     steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.21.0'
+      - name: Setup buildah
+        run: |
+          sudo apt-get -y -qq update
+          sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
+          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          make -C buildah buildah
+          sudo mkdir -p /usr/local/bin/
+          sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
+          sudo apt install protobuf-compiler
+          git clone https://github.com/containers/netavark
+          make -C netavark/
+          sudo mkdir -p /usr/local/libexec/podman/
+          sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
+          curl -L https://github.com/containers/crun/releases/download/1.14.3/crun-1.14.3-linux-amd64 --output crun
+          chmod +x crun
+          sudo cp crun /usr/local/bin/crun
+          echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
       - name: Cleanup
         run: |
           docker rmi -f $(docker images -aq) || :
