@@ -67,6 +67,10 @@ jobs:
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
           sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
+          curl -L https://github.com/containers/crun/releases/download/1.14.3/crun-1.14.3-linux-amd64 --output crun
+          chmod +x crun
+          sudo cp crun /usr/local/bin/crun
+          echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -272,7 +276,10 @@ jobs:
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
           sudo cp "$PWD/netavark/bin"/* /usr/local/libexec/podman/
-
+          curl -L https://github.com/containers/crun/releases/download/1.14.3/crun-1.14.3-linux-amd64 --output crun
+          chmod +x crun
+          sudo cp crun /usr/local/bin/crun
+          echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
       - name: Cleanup
         run: |
           docker rmi -f $(docker images -aq) || :
