@@ -58,7 +58,7 @@ jobs:
         run: |
           sudo apt-get -y -qq update
           sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
-          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          git clone https://github.com/containers/buildah buildah
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
@@ -267,7 +267,7 @@ jobs:
         run: |
           sudo apt-get -y -qq update
           sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
-          git clone https://github.com/ChristopherHX/containers-buildah buildah
+          git clone https://github.com/containers/buildah buildah
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
