@@ -59,6 +59,7 @@ jobs:
           sudo apt-get -y -qq update
           sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
           git clone https://github.com/containers/buildah buildah
+          git -C buildah checkout v1.35.0
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
@@ -71,6 +72,9 @@ jobs:
           chmod +x crun
           sudo cp crun /usr/local/bin/crun
           echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
+          git clone https://passt.top/passt
+          make -C passt pasta
+          echo "$PWD/passt" >> $GITHUB_PATH
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -268,6 +272,7 @@ jobs:
           sudo apt-get -y -qq update
           sudo apt-get -y install bats btrfs-progs git go-md2man golang libapparmor-dev libglib2.0-dev libgpgme11-dev libseccomp-dev libselinux1-dev make skopeo
           git clone https://github.com/containers/buildah buildah
+          git -C buildah checkout v1.35.0
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
@@ -280,6 +285,9 @@ jobs:
           chmod +x crun
           sudo cp crun /usr/local/bin/crun
           echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
+          git clone https://passt.top/passt
+          make -C passt pasta
+          echo "$PWD/passt" >> $GITHUB_PATH
       - name: Cleanup
         run: |
           docker rmi -f $(docker images -aq) || :
