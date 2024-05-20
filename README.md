@@ -21,7 +21,8 @@
   - You can verify if the Image is still updated regulary by inspecting the dates in `docker buildx imagetools inspect catthehacker/ubuntu:full-latest --format "{{ json . }}"`
     - The friendly tag name version in the output can be looked up here https://github.com/actions/runner-images/releases to find out more about the sources
   - available tags are
-    - `ghcr.io/catthehacker/ubuntu:full-latest`
+    - `ghcr.io/catthehacker/ubuntu:full-latest` (aka `full-22.04`)
+    - `ghcr.io/catthehacker/ubuntu:full-24.04` (beta image)
     - `ghcr.io/catthehacker/ubuntu:full-22.04`
     - `ghcr.io/catthehacker/ubuntu:full-20.04` (Updated as long ubuntu-20.04 free public GitHub Hosted Runners are available)
 

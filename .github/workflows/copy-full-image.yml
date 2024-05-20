@@ -30,6 +30,8 @@ jobs:
         copy:
         - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-large-${{ inputs.version || 'latest' }}
           dest: full-latest
+        - src: ghcr.io/christopherhx/runner-images:ubuntu24-runner-large-${{ inputs.version || 'latest' }}
+          dest: full-24.04
         - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-large-${{ inputs.version || 'latest' }}
           dest: full-22.04
         - src: ghcr.io/christopherhx/runner-images:ubuntu20-runner-large-${{ inputs.version || 'latest' }}
