@@ -8,7 +8,7 @@ set -Eeuxo pipefail
 printf "\n\t🐋 Creating runner users 🐋\t\n"
 
 # 24.04 has default user 'ubuntu' with id=1000
-if [ "$ID" = "24.04" ];
+if [ "$ID" = "24.04" ]; then
   sed -i 's/ubuntu/runneradmin/' /etc/passwd
   sed -i 's/ubuntu/runneradmin/' /etc/group
 else
