@@ -3,13 +3,25 @@
 
 set -Eeuxo pipefail
 
+. /etc/os-release
+
 printf "\n\t🐋 Creating runner users 🐋\t\n"
+
+# 24.04 has default user 'ubuntu' with id=1000
+if [ "$ID" = "24.04" ];
+  sed -i 's/ubuntu/runneradmin/' /etc/passwd
+  sed -i 's/ubuntu/runneradmin/' /etc/group
+else
+  groupadd -g 1000 "${RUNNER}admin"
+  useradd -u 1000 -g "${RUNNER}admin" -G sudo -m -s /bin/bash "${RUNNER}admin"
+fi
+
 groupadd -g 1001 "${RUNNER}"
-groupadd -g 1000 "${RUNNER}admin"
 useradd -u 1001 -g "${RUNNER}" -G sudo -m -s /bin/bash "${RUNNER}"
-useradd -u 1000 -g "${RUNNER}admin" -G sudo -m -s /bin/bash "${RUNNER}admin"
+
 usermod -aG docker "runner"
 usermod -aG docker "runneradmin"
+
 {
   echo "${RUNNER} ALL=(ALL) NOPASSWD: ALL"
   echo "${RUNNER}admin ALL=(ALL) NOPASSWD: ALL"
