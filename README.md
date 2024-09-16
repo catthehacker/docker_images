@@ -1,3 +1,10 @@
+# MOD
+
+This is a modified version of the docker generation scripts, since I wanted to use a runner with the gcc arm compiler, which isn't available as apt package anymore and the original source that uses it hasn't updated their scripts and toolchain for a while.
+
+
+I'm keeping the rest of the original README for now.
+
 # Docker images
 
 [![Scheduled build (Ubuntu)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml/badge.svg?event=schedule)](https://github.com/catthehacker/docker_images/actions/workflows/build-ubuntu.yml)

@@ -1,8 +1,6 @@
 name: Build ubuntu images
 
 on:
-  schedule:
-    - cron: 0 12 */7 * *
   push:
     paths:
       - '.github/workflows/build-ubuntu.yml'
@@ -26,8 +24,8 @@ env:
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
-  PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
-  PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
+  #PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
+  #PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
   LATEST_TAG: 22.04
 
 defaults:
@@ -46,10 +44,9 @@ jobs:
       max-parallel: 4
       matrix:
         PLATFORMS:
-          - linux/amd64,linux/arm64,linux/arm/v7
+          - linux/amd64
         TAG:
           - 22.04
-          - 20.04
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -63,7 +60,7 @@ jobs:
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
-          sudo apt install protobuf-compiler
+          sudo apt-get -y install protobuf-compiler
           git clone https://github.com/containers/netavark
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
@@ -236,33 +233,11 @@ jobs:
       matrix:
         TAG:
           - 22.04
-          - 20.04
         TYPE:
-          - go
-          - js
-          - pwsh
-          - rust
-          - dotnet
-          - java-tools
-          - gh
-          - custom
+          - arm_gcc
         include:
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: go
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: js
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: pwsh
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: rust
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: dotnet
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: java-tools
-          - PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
-            TYPE: gh
-          - PLATFORMS: linux/amd64,linux/arm64
-            TYPE: custom
+          - PLATFORMS: linux/amd64
+            TYPE: arm_gcc
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -276,7 +251,7 @@ jobs:
           make -C buildah buildah
           sudo mkdir -p /usr/local/bin/
           sudo cp "$PWD/buildah/bin"/* /usr/local/bin/
-          sudo apt install protobuf-compiler
+          sudo apt-get -y install protobuf-compiler
           git clone https://github.com/containers/netavark
           make -C netavark/
           sudo mkdir -p /usr/local/libexec/podman/
