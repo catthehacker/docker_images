@@ -117,6 +117,24 @@ ForEach($platform in $platforms.Split(",")) {
 
 if($push -eq $true) {
    ForEach($t in ($tags + ($tag -ne '' ? @("$tag") : @()))) {
-       exec buildah manifest push --all "$manifest" "docker://$t"
-   }
+        $retries = 0
+        $maxRetries = 3
+        $success = $false
+
+        while(-not $success -and $retries -lt $maxRetries) {
+            try {
+                exec buildah manifest push --all "$manifest" "docker://$t"
+                $success = $true
+            } catch {
+                $retries++
+                Write-Host "Error encountered during push. Retrying... ($retries/$maxRetries)"
+                Start-Sleep -Seconds 2
+            }
+        }
+
+        if(-not $success) {
+            Write-Host "Failed to push after $maxRetries attempts."
+            exit 1
+        }
+    }
 }
