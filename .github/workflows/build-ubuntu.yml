@@ -22,7 +22,7 @@ env:
   IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '16 18'
+  NODE: '16 18 20'
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
@@ -48,6 +48,7 @@ jobs:
         PLATFORMS:
           - linux/amd64,linux/arm64,linux/arm/v7
         TAG:
+          - 24.04
           - 22.04
           - 20.04
     steps:
@@ -235,6 +236,7 @@ jobs:
       max-parallel: 8
       matrix:
         TAG:
+          - 24.04
           - 22.04
           - 20.04
         TYPE:
