@@ -38,7 +38,7 @@ jobs:
   build-base:
     name: Build base ${{ matrix.TAG }}
     if: "!contains(github.event.pull_request.body, '[skip build-base]')"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
     strategy:
@@ -225,7 +225,7 @@ jobs:
   build-flavours:
     name: Build ${{ matrix.TYPE }}:${{ matrix.TAG }}
     if: (!cancelled() && !failure())
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build-base]
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
