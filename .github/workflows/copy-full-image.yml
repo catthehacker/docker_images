@@ -34,8 +34,6 @@ jobs:
           dest: full-24.04
         - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-large-${{ inputs.version || 'latest' }}
           dest: full-22.04
-        - src: ghcr.io/christopherhx/runner-images:ubuntu20-runner-large-${{ inputs.version || 'latest' }}
-          dest: full-20.04
     steps:
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
