@@ -24,28 +24,49 @@
     - `ghcr.io/catthehacker/ubuntu:full-latest` (aka `full-22.04`)
     - `ghcr.io/catthehacker/ubuntu:full-24.04` (beta image)
     - `ghcr.io/catthehacker/ubuntu:full-22.04`
-    - `ghcr.io/catthehacker/ubuntu:full-20.04` (Updated as long ubuntu-20.04 free public GitHub Hosted Runners are available)
 
 - [`/linux/ubuntu/act`](./linux/ubuntu/scripts/act.sh) - image used in [github.com/nektos/act][nektos/act] as medium size image retaining compatibility with most actions while maintaining small size
-  - `ghcr.io/catthehacker/ubuntu:act-20.04`
   - `ghcr.io/catthehacker/ubuntu:act-22.04`
+  - `ghcr.io/catthehacker/ubuntu:act-24.04`
   - `ghcr.io/catthehacker/ubuntu:act-latest`
 - [`/linux/ubuntu/runner`](./linux/ubuntu/scripts/runner.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `runner` as user instead of `root`
-  - `ghcr.io/catthehacker/ubuntu:runner-20.04`
   - `ghcr.io/catthehacker/ubuntu:runner-22.04`
+  - `ghcr.io/catthehacker/ubuntu:runner-24.04`
   - `ghcr.io/catthehacker/ubuntu:runner-latest`
 - [`/linux/ubuntu/js`](./linux/ubuntu/scripts/js.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `js` tools installed (`yarn`, `nvm`, `node` v16/v18, `pnpm`, `grunt`, etc.)
-  - `ghcr.io/catthehacker/ubuntu:js-20.04`
   - `ghcr.io/catthehacker/ubuntu:js-22.04`
+  - `ghcr.io/catthehacker/ubuntu:js-24.04`
   - `ghcr.io/catthehacker/ubuntu:js-latest`
 - [`/linux/ubuntu/rust`](./linux/ubuntu/scripts/rust.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `rust` tools installed (`rustfmt`, `clippy`, `cbindgen`, etc.)
-  - `ghcr.io/catthehacker/ubuntu:rust-20.04`
   - `ghcr.io/catthehacker/ubuntu:rust-22.04`
+  - `ghcr.io/catthehacker/ubuntu:rust-24.04`
   - `ghcr.io/catthehacker/ubuntu:rust-latest`
 - [`/linux/ubuntu/pwsh`](./linux/ubuntu/scripts/pwsh.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `pwsh` tools and modules installed
-  - `ghcr.io/catthehacker/ubuntu:pwsh-20.04`
   - `ghcr.io/catthehacker/ubuntu:pwsh-22.04`
+  - `ghcr.io/catthehacker/ubuntu:pwsh-24.04`
   - `ghcr.io/catthehacker/ubuntu:pwsh-latest`
+- [`/linux/ubuntu/go`](./linux/ubuntu/scripts/go.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `go` tools installed
+  - `ghcr.io/catthehacker/ubuntu:go-22.04`
+  - `ghcr.io/catthehacker/ubuntu:go-24.04`
+  - `ghcr.io/catthehacker/ubuntu:go-latest`
+- [`/linux/ubuntu/dotnet`](./linux/ubuntu/scripts/dotnet.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with `.NET` tools installed
+  - `ghcr.io/catthehacker/ubuntu:dotnet-22.04`
+  - `ghcr.io/catthehacker/ubuntu:dotnet-24.04`
+  - `ghcr.io/catthehacker/ubuntu:dotnet-latest`
+- [`/linux/ubuntu/java-tools`](./linux/ubuntu/scripts/java-tools.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with Java tools installed
+  - `ghcr.io/catthehacker/ubuntu:java-tools-22.04`
+  - `ghcr.io/catthehacker/ubuntu:java-tools-24.04`
+  - `ghcr.io/catthehacker/ubuntu:java-tools-latest`
+- [`/linux/ubuntu/gh`](./linux/ubuntu/scripts/gh.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with GitHub CLI tools installed
+  - `ghcr.io/catthehacker/ubuntu:gh-22.04`
+  - `ghcr.io/catthehacker/ubuntu:gh-24.04`
+  - `ghcr.io/catthehacker/ubuntu:gh-latest`
+- [`/linux/ubuntu/custom`](./linux/ubuntu/scripts/custom.sh) - `ghcr.io/catthehacker/ubuntu:act-*` but with custom tools installed
+  - `ghcr.io/catthehacker/ubuntu:custom-22.04`
+  - `ghcr.io/catthehacker/ubuntu:custom-24.04`
+  - `ghcr.io/catthehacker/ubuntu:custom-latest`
+
+## [`ubuntu-20.04` has been deprecated and images for that environment will not be updated anymore](https://github.com/actions/runner-images/pull/11748)
 
 ## [`ubuntu-18.04` has been deprecated and images for that environment will not be updated anymore](https://github.com/actions/runner-images/issues/6002)
 

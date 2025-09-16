@@ -50,7 +50,6 @@ jobs:
         TAG:
           - 24.04
           - 22.04
-          - 20.04
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -155,7 +154,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
@@ -199,7 +198,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
@@ -238,7 +237,6 @@ jobs:
         TAG:
           - 24.04
           - 22.04
-          - 20.04
         TYPE:
           - go
           - js
@@ -373,7 +371,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
