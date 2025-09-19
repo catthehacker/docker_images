@@ -22,7 +22,7 @@ env:
   IMAGE_LABEL_REPO: ${{ github.repository }}
   SLUG: ${{ github.repository_owner }}/ubuntu
   DISTRO: ubuntu
-  NODE: '16 18 20'
+  NODE: '16 18 20 22 24' # 24 is the default
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}

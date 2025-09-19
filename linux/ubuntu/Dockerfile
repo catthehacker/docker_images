@@ -11,7 +11,7 @@ ARG FROM_TAG
 
 # > Our custom ARGs
 # latest Node.js LTS versions
-ARG NODE_VERSION="16 18"
+ARG NODE_VERSION="16 18 20 22" # v24 is installed in js.sh
 ARG DISTRO=ubuntu
 ARG TYPE=act
 ARG RUNNER
