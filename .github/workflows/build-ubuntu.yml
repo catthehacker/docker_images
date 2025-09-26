@@ -155,7 +155,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
@@ -199,7 +199,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
@@ -373,7 +373,7 @@ jobs:
           }
 
           echo $tags
-          
+
           ./build.ps1 `
               -push `
               -tags $tags
