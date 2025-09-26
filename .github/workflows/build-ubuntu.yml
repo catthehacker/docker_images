@@ -265,6 +265,9 @@ jobs:
             TYPE: gh
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
+        exclude:
+          - TAG: 20.04
+            TYPE: go
     steps:
       - uses: actions/setup-go@v5
         with:
