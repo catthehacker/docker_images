@@ -26,9 +26,9 @@ env:
   BUILD_REF: ${{ github.sha }}
   SKIP_TEST: false
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
-  PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
+  # PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
   PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
-  LATEST_TAG: 22.04
+  LATEST_TAG: 24.04
 
 defaults:
   run:
@@ -87,9 +87,9 @@ jobs:
         if: env.PUSH_GHCR
         run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
-      - name: Login to Quay
-        if: env.PUSH_QUAY
-        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
+      # - name: Login to Quay
+      #   if: env.PUSH_QUAY
+      #   run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
         if: env.PUSH_DOCKER_HUB
@@ -146,9 +146,9 @@ jobs:
             if($env:PUSH_GHCR) {
               $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
-            if($env:PUSH_QUAY) {
-              $tags += "quay.io/${env:SLUG}:$tagName"
-            }
+            # if($env:PUSH_QUAY) {
+            #   $tags += "quay.io/${env:SLUG}:$tagName"
+            # }
             if($env:PUSH_DOCKER_HUB) {
               $tags += "docker.io/${env:SLUG}:$tagName"
             }
@@ -190,9 +190,9 @@ jobs:
             if($env:PUSH_GHCR) {
               $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
-            if($env:PUSH_QUAY) {
-              $tags += "quay.io/${env:SLUG}:$tagName"
-            }
+            # if($env:PUSH_QUAY) {
+            #   $tags += "quay.io/${env:SLUG}:$tagName"
+            # }
             if($env:PUSH_DOCKER_HUB) {
               $tags += "docker.io/${env:SLUG}:$tagName"
             }
@@ -311,9 +311,9 @@ jobs:
         if: env.PUSH_GHCR
         run: exec buildah login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
 
-      - name: Login to Quay
-        if: env.PUSH_QUAY
-        run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
+      # - name: Login to Quay
+      #   if: env.PUSH_QUAY
+      #   run: exec buildah login -u ${{ secrets.QUAY_USER }} -p ${{ secrets.QUAY_TOKEN }} quay.io
 
       - name: Login to Docker Hub
         if: env.PUSH_DOCKER_HUB
@@ -367,9 +367,9 @@ jobs:
             if($env:PUSH_GHCR) {
               $tags += "ghcr.io/${env:SLUG}:$tagName"
             }
-            if($env:PUSH_QUAY) {
-              $tags += "quay.io/${env:SLUG}:$tagName"
-            }
+            # if($env:PUSH_QUAY) {
+            #   $tags += "quay.io/${env:SLUG}:$tagName"
+            # }
             if($env:PUSH_DOCKER_HUB) {
               $tags += "docker.io/${env:SLUG}:$tagName"
             }
