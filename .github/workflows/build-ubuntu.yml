@@ -73,9 +73,9 @@ jobs:
           chmod +x crun
           sudo cp crun /usr/local/bin/crun
           echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
-          git clone https://passt.top/passt
-          make -C passt
-          sudo make -C passt install
+
+          apt-get install -y passt
+
       - name: Force SLUG to lowercase
         uses: actions/github-script@v6
         with:
@@ -290,9 +290,9 @@ jobs:
           chmod +x crun
           sudo cp crun /usr/local/bin/crun
           echo "BUILDAH_RUNTIME=/usr/local/bin/crun" >> $GITHUB_ENV
-          git clone https://passt.top/passt
-          make -C passt
-          sudo make -C passt install
+
+          apt-get install -y passt
+
       - name: Cleanup
         run: |
           docker rmi -f $(docker images -aq) || :
