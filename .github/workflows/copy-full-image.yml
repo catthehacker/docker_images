@@ -12,7 +12,7 @@ on:
 env:
   SLUG: ${{ github.repository_owner }}/ubuntu
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
-  PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
+  # PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
   PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
 
 defaults:
@@ -28,7 +28,7 @@ jobs:
       max-parallel: 1
       matrix:
         copy:
-        - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-large-${{ inputs.version || 'latest' }}
+        - src: ghcr.io/christopherhx/runner-images:ubuntu24-runner-large-${{ inputs.version || 'latest' }}
           dest: full-latest
         - src: ghcr.io/christopherhx/runner-images:ubuntu24-runner-large-${{ inputs.version || 'latest' }}
           dest: full-24.04
@@ -48,9 +48,9 @@ jobs:
         if: env.PUSH_GHCR
         run: skopeo copy -a --src-creds ${{ github.actor }}:${{ github.token }} --dest-creds ${{ github.actor }}:${{ github.token }} docker://${{ matrix.copy.src }} docker://ghcr.io/${{ env.SLUG }}:${{ matrix.copy.dest }}
 
-      - name: Login to Quay
-        if: env.PUSH_QUAY
-        run: skopeo copy -a --src-creds ${{ github.actor }}:${{ github.token }} --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} docker://${{ matrix.copy.src }} docker://quay.io/${{ env.SLUG }}:${{ matrix.copy.dest }}
+      # - name: Login to Quay
+      #   if: env.PUSH_QUAY
+      #   run: skopeo copy -a --src-creds ${{ github.actor }}:${{ github.token }} --dest-creds ${{ secrets.QUAY_USER }}:${{ secrets.QUAY_TOKEN }} docker://${{ matrix.copy.src }} docker://quay.io/${{ env.SLUG }}:${{ matrix.copy.dest }}
 
       - name: Login to Docker Hub
         if: env.PUSH_DOCKER_HUB
