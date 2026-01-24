@@ -123,6 +123,9 @@ printf "\n\t🐋 Installed moby-buildx 🐋\t\n"
 docker buildx version
 IFS=' ' read -r -a NODE <<<"$NODE_VERSION"
 for ver in "${NODE[@]}"; do
+  if [[ "${ver}" == "24" && "$(node_arch)" == "armv7l"]]; then
+    ver="22" # rip arm32/v7
+  fi
   printf "\n\t🐋 Installing Node.JS=%s 🐋\t\n" "${ver}"
   VER=$(curl https://nodejs.org/download/release/index.json | jq "[.[] | select(.version|test(\"^v${ver}\"))][0].version" -r)
   NODEPATH="${ACT_TOOLSDIRECTORY}/node/${VER:1}/$(node_arch)"
