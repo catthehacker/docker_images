@@ -20,8 +20,8 @@ echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' | tee 
 printf "\n\t🐋 Installed NVM 🐋\t\n"
 nvm --version
 
-# node 16 and 18 are already installed in act-*
-versions=("20")
+
+versions=("")
 JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-output)
 
 for V in "${versions[@]}"; do

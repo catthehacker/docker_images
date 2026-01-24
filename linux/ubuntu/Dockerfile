@@ -11,7 +11,7 @@ ARG FROM_TAG
 
 # > Our custom ARGs
 # latest Node.js LTS versions
-ARG NODE_VERSION="16 18"
+ARG NODE_VERSION="20 24"
 ARG DISTRO=ubuntu
 ARG TYPE=act
 ARG RUNNER
