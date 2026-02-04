@@ -114,7 +114,7 @@ gpg --dearmor <microsoft.asc >/etc/apt/trusted.gpg.d/microsoft.gpg
 apt-key add - <microsoft.asc
 rm microsoft.asc
 apt-get -yq update
-apt-get -yq install --no-install-recommends --no-install-suggests moby-cli moby-buildx moby-compose
+apt-get -yq install --no-install-recommends --no-install-suggests moby-engine moby-cli moby-buildx moby-compose
 
 printf "\n\t🐋 Installed moby-cli 🐋\t\n"
 docker -v
