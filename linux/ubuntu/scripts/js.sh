@@ -21,7 +21,7 @@ printf "\n\t🐋 Installed NVM 🐋\t\n"
 nvm --version
 
 
-versions=("")
+versions=()
 JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-output)
 
 for V in "${versions[@]}"; do
