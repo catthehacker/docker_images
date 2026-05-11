@@ -174,8 +174,8 @@ if [ -z "$mavenLatest" ]; then
 fi
 
 mavenDownloadUrl="https://archive.apache.org/dist/maven/maven-${mavenLatest%%.*}/${mavenLatest}/binaries/apache-maven-${mavenLatest}-bin.zip"
-download_with_retries ${mavenDownloadUrl} "/tmp" "maven.zip"
-unzip -qq -d /usr/share /tmp/maven.zip
+maven_archive=$(download_with_retry "${mavenDownloadUrl}" "/tmp/maven.zip")
+unzip -qq -d /usr/share "${maven_archive}"
 ln -s /usr/share/apache-maven-${mavenLatest}/bin/mvn /usr/bin/mvn
 
 # Install Gradle
@@ -186,8 +186,8 @@ gradleLatestVersion=$(echo ${gradleJson} | jq -r '.[] | select(.version | contai
 gradleDownloadUrl=$(echo ${gradleJson} | jq -r ".[] | select(.version==\"$gradleLatestVersion\") | .downloadUrl")
 echo "gradleUrl=${gradleDownloadUrl}"
 echo "gradleVersion=${gradleLatestVersion}"
-download_with_retries ${gradleDownloadUrl} "/tmp" "gradleLatest.zip"
-unzip -qq -d /usr/share /tmp/gradleLatest.zip
+gradle_archive=$(download_with_retry "${gradleDownloadUrl}" "/tmp/gradleLatest.zip")
+unzip -qq -d /usr/share "${gradle_archive}"
 ln -s /usr/share/gradle-"${gradleLatestVersion}"/bin/gradle /usr/bin/gradle
 echo "GRADLE_HOME=$(find /usr/share -depth -maxdepth 1 -name "gradle*")" | tee -a /etc/environment
 

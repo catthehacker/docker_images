@@ -21,9 +21,9 @@ yq_arch() {
 # Download YQ
 base_url="https://github.com/mikefarah/yq/releases/latest/download"
 filename="yq_linux_$(yq_arch)"
-download_with_retries "${base_url}/${filename}" "/tmp" "yq"
+yq_archive=$(download_with_retry "${base_url}/${filename}")
 # Supply chain security - YQ
 external_hash=$(get_hash_from_remote_file "${base_url}/checksums" "${filename} " "" " " "19")
-use_checksum_comparison "/tmp/yq" "${external_hash}"
+use_checksum_comparison "${yq_archive}" "${external_hash}"
 # Install YQ
-sudo install /tmp/yq /usr/bin/yq
+sudo install "${yq_archive}" /usr/bin/yq
