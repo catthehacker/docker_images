@@ -154,11 +154,29 @@ apt-get install -y --no-install-recommends ant ant-optional
 echo "ANT_HOME=/usr/share/ant" | tee -a /etc/environment
 
 # Install Maven
+# Dynamic major-version resolution adapted from actions/runner-images#13993
 mavenVersion=$(get_toolset_value '.java.maven')
-mavenDownloadUrl="https://www-eu.apache.org/dist/maven/maven-3/${mavenVersion}/binaries/apache-maven-${mavenVersion}-bin.zip"
-download_with_retries ${mavenDownloadUrl} "/tmp" "maven.zip"
-unzip -qq -d /usr/share /tmp/maven.zip
-ln -s /usr/share/apache-maven-${mavenVersion}/bin/mvn /usr/bin/mvn
+if [[ "$mavenVersion" =~ ^[0-9]+$ ]]; then
+  mavenLatest=$(
+    curl --fail --silent --show-error --location https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml \
+      | grep -oE "<version>${mavenVersion}\.[0-9]+\.[0-9]+</version>" \
+      | sed -E 's#</?version>##g' \
+      | sort -V \
+      | tail -n 1
+  )
+else
+  mavenLatest="$mavenVersion"
+fi
+
+if [ -z "$mavenLatest" ]; then
+  echo "Failed to resolve Maven version from '$mavenVersion'"
+  exit 1
+fi
+
+mavenDownloadUrl="https://archive.apache.org/dist/maven/maven-${mavenLatest%%.*}/${mavenLatest}/binaries/apache-maven-${mavenLatest}-bin.zip"
+maven_archive=$(download_with_retry "${mavenDownloadUrl}" "/tmp/maven.zip")
+unzip -qq -d /usr/share "${maven_archive}"
+ln -s /usr/share/apache-maven-${mavenLatest}/bin/mvn /usr/bin/mvn
 
 # Install Gradle
 # This script founds the latest gradle release from https://services.gradle.org/versions/all
@@ -168,8 +186,8 @@ gradleLatestVersion=$(echo ${gradleJson} | jq -r '.[] | select(.version | contai
 gradleDownloadUrl=$(echo ${gradleJson} | jq -r ".[] | select(.version==\"$gradleLatestVersion\") | .downloadUrl")
 echo "gradleUrl=${gradleDownloadUrl}"
 echo "gradleVersion=${gradleLatestVersion}"
-download_with_retries ${gradleDownloadUrl} "/tmp" "gradleLatest.zip"
-unzip -qq -d /usr/share /tmp/gradleLatest.zip
+gradle_archive=$(download_with_retry "${gradleDownloadUrl}" "/tmp/gradleLatest.zip")
+unzip -qq -d /usr/share "${gradle_archive}"
 ln -s /usr/share/gradle-"${gradleLatestVersion}"/bin/gradle /usr/bin/gradle
 echo "GRADLE_HOME=$(find /usr/share -depth -maxdepth 1 -name "gradle*")" | tee -a /etc/environment
 
