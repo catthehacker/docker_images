@@ -28,7 +28,7 @@ env:
   PUSH_GHCR: ${{ github.repository == (github.event.pull_request.head.repo.full_name || github.repository) && '1' || '' }}
   # PUSH_QUAY: ${{ secrets.QUAY_USER && secrets.QUAY_TOKEN && '1' || '' }}
   PUSH_DOCKER_HUB: ${{ secrets.DOCKER_USER && secrets.DOCKER_TOKEN && '1' || '' }}
-  LATEST_TAG: 24.04
+  LATEST_TAG: 26.04
 
 defaults:
   run:
@@ -42,20 +42,20 @@ jobs:
     env:
       PLATFORMS: ${{ matrix.PLATFORMS }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       max-parallel: 4
       matrix:
         PLATFORMS:
-          - linux/amd64,linux/arm64,linux/arm/v7
+          - linux/amd64,linux/arm64
         TAG:
+          - 26.04
           - 24.04
           - 22.04
-          - 20.04
     steps:
       - name: Disable apparmor restrictions
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: '>=1.21.0'
       - name: Setup buildah
@@ -80,7 +80,7 @@ jobs:
           sudo apt-get install -y passt
 
       - name: Force SLUG to lowercase
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           github-token: n/a
           script: |
@@ -108,16 +108,12 @@ jobs:
 
       - name: Set Ubuntu version to RELEASE
         run: |
-          if [ "$LATEST_TAG" = "${{ matrix.TAG }}" ]; then
-            echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
-          else
-            echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
-          fi
+          echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         shell: buildah unshare pwsh "{0}"
@@ -208,12 +204,12 @@ jobs:
               -tags $tags
 
       - if: ${{ !env.SKIP_TEST }}
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v7
         with:
           go-version: '^1.16'
 
       - if: ${{ !env.SKIP_TEST }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           repository: nektos/act
           path: act
@@ -239,9 +235,9 @@ jobs:
       max-parallel: 8
       matrix:
         TAG:
+          - 26.04
           - 24.04
           - 22.04
-          - 20.04
         TYPE:
           - go
           - js
@@ -264,18 +260,15 @@ jobs:
             TYPE: dotnet
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: java-tools
-          - PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
+          - PLATFORMS: linux/amd64,linux/arm64
             TYPE: gh
           - PLATFORMS: linux/amd64,linux/arm64
             TYPE: custom
-        exclude:
-          - TAG: 20.04
-            TYPE: go
     steps:
       - name: Disable apparmor restrictions
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: '>=1.21.0'
       - name: Setup buildah
@@ -307,7 +300,7 @@ jobs:
           rm -r "$AGENT_TOOLSDIRECTORY" || :
         shell: bash
       - name: Force SLUG to lowercase
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           github-token: n/a
           script: |
@@ -335,16 +328,12 @@ jobs:
 
       - name: Set Ubuntu version to RELEASE
         run: |
-          if [ "$LATEST_TAG" = "${{ matrix.TAG }}" ]; then
-            echo "RELEASE_TAG=$(lsb_release -rs)" | tee -a "$GITHUB_ENV"
-          else
-            echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
-          fi
+          echo "RELEASE_TAG=${{ matrix.TAG }}" | tee -a "$GITHUB_ENV"
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v4
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Build and push ${{ env.DISTRO }}:${{ env.TAG }}
         shell: buildah unshare pwsh "{0}"

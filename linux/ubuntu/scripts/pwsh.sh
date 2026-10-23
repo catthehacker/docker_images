@@ -7,6 +7,9 @@ set -Eeuxo pipefail
 
 printf "\n\t🐋 Installing PowerShell 🐋\t\n"
 
+apt-get -yq update
+apt-get -yq install --no-install-recommends libicu-dev
+
 # While an linux/amd64 platform installation can use apt-get, the linux/arm64
 # platform installation can't as described here:
 # https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7.1#support-for-arm-processors

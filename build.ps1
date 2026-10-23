@@ -133,8 +133,7 @@ if($push -eq $true) {
         }
 
         if(-not $success) {
-            Write-Host "Failed to push after $maxRetries attempts."
-            exit 1
+            throw "Failed to push after $maxRetries attempts."
         }
     }
 }

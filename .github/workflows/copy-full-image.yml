@@ -28,17 +28,17 @@ jobs:
       max-parallel: 1
       matrix:
         copy:
-        - src: ghcr.io/christopherhx/runner-images:ubuntu24-runner-large-${{ inputs.version || 'latest' }}
+        - src: ghcr.io/christopherhx/runner-images:ubuntu26-runner-large-${{ inputs.version || 'latest' }}
           dest: full-latest
+        - src: ghcr.io/christopherhx/runner-images:ubuntu26-runner-large-${{ inputs.version || 'latest' }}
+          dest: full-26.04
         - src: ghcr.io/christopherhx/runner-images:ubuntu24-runner-large-${{ inputs.version || 'latest' }}
           dest: full-24.04
         - src: ghcr.io/christopherhx/runner-images:ubuntu22-runner-large-${{ inputs.version || 'latest' }}
           dest: full-22.04
-        - src: ghcr.io/christopherhx/runner-images:ubuntu20-runner-large-${{ inputs.version || 'latest' }}
-          dest: full-20.04
     steps:
       - name: Force SLUG to lowercase
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           github-token: n/a
           script: |

@@ -21,7 +21,7 @@ printf "\n\t🐋 Installed NVM 🐋\t\n"
 nvm --version
 
 
-versions=("")
+versions=()
 JSON=$(wget -qO- https://nodejs.org/download/release/index.json | jq --compact-output)
 
 for V in "${versions[@]}"; do
@@ -69,7 +69,7 @@ npm install -g vercel
 npm install -g webpack
 npm install -g webpack-cli
 npm install -g lerna
-npm install -g --unsafe-perm netlify-cli
+npm install -g netlify-cli
 
 printf "\n\t🐋 Installed NPM 🐋\t\n"
 npm -v
