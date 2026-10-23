@@ -52,6 +52,11 @@ mkdir -m 0700 -p "/home/${RUNNER}/.ssh"
 chmod 644 "/home/${RUNNER}/.ssh/known_hosts"
 chown -R "${RUNNER}":"${RUNNER}" "/home/${RUNNER}/.ssh"
 
+mkdir -m 0755 -p "/home/${RUNNER}/.local/bin"
+chown -R "${RUNNER}":"${RUNNER}" "/home/${RUNNER}/.local"
+sed '/^PATH=/s,\([=:]\)/root/.local/bin\(:\|$\),\1,g' -i /etc/environment
+sed "s,^PATH=,PATH=/home/${RUNNER}/.local/bin:," -i /etc/environment
+
 . /etc/environment
 
 # Word is of the form "A"B"C" (B indicated). Did you mean "ABC" or "A\"B\"C"?shellcheck(SC2140)

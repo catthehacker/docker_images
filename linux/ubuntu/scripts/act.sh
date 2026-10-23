@@ -168,6 +168,10 @@ for SCRIPT in "${scripts[@]}"; do
   "/imagegeneration/installers/${SCRIPT}.sh"
 done
 
+printf "\n\t🐋 Creating ~/.local/bin and adding to PATH 🐋\t\n"
+mkdir -m 0755 -p "${HOME}/.local/bin"
+sed "s|^PATH=|PATH=${HOME}/.local/bin:|mg" -i /etc/environment
+
 printf "\n\t🐋 Cleaning image 🐋\t\n"
 apt-get clean
 rm -rf /var/cache/* /var/log/* /var/lib/apt/lists/* /tmp/* || echo 'Failed to delete directories'
